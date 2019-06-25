@@ -14,5 +14,5 @@
 
     </div>
     <!-- Default to the left -->
-    <strong>版权所有 <a href="{{config('app.url')}}" target="_blank">laravel-admin</a></strong>
+    <strong>版权所有 <a href="{{config('app.url')}}" target="_blank">智慧食堂</a></strong>
 </footer>
