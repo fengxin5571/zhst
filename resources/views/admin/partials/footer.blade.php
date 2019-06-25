@@ -14,5 +14,5 @@
 
     </div>
     <!-- Default to the left -->
-    <strong>版权所有 <a href="https://github.com/z-song/laravel-admin" target="_blank">laravel-admin</a></strong>
+    <strong>版权所有 <a href="{{config('app.url')}}" target="_blank">laravel-admin</a></strong>
 </footer>
