@@ -31,3 +31,16 @@ app('view')->prependNamespace('admin', resource_path('views/admin'));
         $tools->disableList();
     });
 });
+//表格初始化
+Encore\Admin\Grid::init(function (Encore\Admin\Grid $grid){
+    $grid->filter(function($filter){
+        // 去掉默认的id过滤器
+        $filter->disableIdFilter();
+    });
+    $grid->actions(function ($actions) {
+        $actions->disableView();
+    });
+    $grid->disableExport();
+    $grid->disableColumnSelector();
+    $grid->paginate(20);
+});

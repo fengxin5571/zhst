@@ -10,10 +10,12 @@
     "require": {
         "php": "^7.1.3",
         "barryvdh/laravel-ide-helper": "^2.6",
+        "caouecs/laravel-lang": "~4.0",
         "codingyu/ueditor": "^2.0",
         "dingo/api": "^2.0.0-alpha2",
         "encore/laravel-admin": "^1.7",
         "fideloper/proxy": "^4.0",
+        "laravel-admin-ext/grid-lightbox": "^1.0",
         "laravel-admin-ext/lock-screen": "^1.0",
         "laravel/framework": "5.8.*",
         "laravel/tinker": "^1.0",
