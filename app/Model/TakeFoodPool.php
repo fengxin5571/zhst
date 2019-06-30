@@ -32,7 +32,6 @@ use Reliese\Database\Eloquent\Model as Eloquent;
 class TakeFoodPool extends Eloquent
 {
 	protected $table = 'take_food_pool';
-    protected $appends = ['is_like'];
 	protected $casts = [
 		'cid' => 'int',
 		'sellCount' => 'int',
@@ -65,9 +64,6 @@ class TakeFoodPool extends Eloquent
     public function getFoodImageAttribute($value)
     {
         return config('filesystems.disks.admin.url').'/'.$value;
-    }
-    public function getIsLikeAttribute($value){
-        return $this->attributes['is_like']=1;
     }
 	//上架外卖菜品
 	public function scopeIsShow($query){
