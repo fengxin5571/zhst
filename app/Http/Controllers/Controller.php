@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -16,7 +17,19 @@ class Controller extends BaseController
     protected $invalid_code          = 422; //请求信息存在语法错误（该状态码的错误信息需要提示给用户）
     protected $servererr_code        = 500; //服务器内部错误
     protected $user;
+    const LIMIT= 15;
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests,Helpers;
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            $this->user=$request->get('user');
+            if(empty($this->user)){
+                return $this->response->error('用户token验证失败',401);
+            }
+            return $next($request);
+        });
+    }
+
     public function successResponse($data,$message='success'){
         return $this->response->array([
             'message'=>$message,

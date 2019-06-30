@@ -23,7 +23,12 @@ $api->version('v1', [
         $api->get('/test','testController@index');
         //外卖预定
         $api->group(['prefix'=>'takeOut'],function($api){
-
+            //特色推荐
+            $api->get('recommend','TakeOutFoodController@recommend');
+            //外卖菜品分类
+            $api->get('category','TakeOutFoodController@category');
+            //外卖预定菜品
+            $api->get('foods','TakeOutFoodController@foods');
         });
         //智慧发现
         $api->group(['prefix'=>'discover'],function($api){

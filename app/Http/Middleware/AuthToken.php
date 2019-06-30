@@ -30,6 +30,7 @@ class AuthToken
 //            if(!$rest_json||$rest_json['code']==700){
 //                throw  new \Exception();
 //            }
+            $request->attributes->add(['user'=>['userId'=>'1124151110244003841','name'=>'xiaoy']]);
             return $next($request);
         }catch (\Exception $e){
             return $this->response->error('用户token验证失败',401);
