@@ -15,9 +15,22 @@ use Illuminate\Http\Request;
 
 $api = app('Dingo\Api\Routing\Router');
 
-$api->version('v1', function($api) {
-    $api->get('version', function() {
-        return response('this is version v1');
+$api->version('v1', [
+    'namespace'=>'App\Http\Controllers\Api',
+    'middleware'=>['bindings'],
+],function($api) {
+    $api->group(['middleware'=>'authToken'],function($api){//用户验证中间件
+        $api->get('/test','testController@index');
+        //外卖预定
+        $api->group(['prefix'=>'takeOut'],function($api){
+
+        });
+        //智慧发现
+        $api->group(['prefix'=>'discover'],function($api){
+            //智慧发现接口
+            $api->get('/','DdiscoverController@index');
+        });
+
     });
 });
 //Route::middleware('auth:api')->get('/user', function (Request $request) {

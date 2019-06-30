@@ -7,6 +7,7 @@
 
 namespace App\Model;
 
+use Illuminate\Support\Facades\Storage;
 use Reliese\Database\Eloquent\Model as Eloquent;
 
 /**
@@ -36,7 +37,10 @@ class TakeFoodPool extends Eloquent
 		'sellCount' => 'int',
 		'likeCount' => 'int',
 		'is_show' => 'int',
-		'mer_id' => 'int'
+		'mer_id' => 'int',
+        'weight' =>'float(10,2)',
+        'ot_price' =>'float(10,2)',
+        'price'    =>'float(10,2)'
 	];
 
 	protected $fillable = [
@@ -44,11 +48,28 @@ class TakeFoodPool extends Eloquent
 		'name',
 		'description',
 		'info',
-		'food_ image',
+		'food_image',
 		'slider_image',
 		'sellCount',
 		'likeCount',
 		'is_show',
-		'mer_id'
+		'mer_id',
+        'weight',
+        'calorie',
+        'ot_price',
+        'is_recommend',
+        'is_today'
 	];
+	public static function boot(){
+	    parent::boot();
+        static ::deleted(function($takeFood){
+            @Storage::disk('admin')->delete($takeFood->food_image);
+        });
+    }
+	public function foodCategory(){
+	    return $this->hasOne(TakeFoodCategory::class,'id','cid');
+    }
+	public function tags(){
+	    return $this->belongsToMany(TakeFoodTag::class,'takefood_tag_relation','t_food_id','t_tag_id');
+    }
 }

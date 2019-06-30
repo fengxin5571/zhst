@@ -13,10 +13,39 @@ Route::group([
     $router->get('/', 'HomeController@index')->name('admin.home');
     //菜品管理
     $router->group(['prefix'=>'food'],function ($router){
-        //外卖菜品池
+
+        //外卖菜品分类
+        $router->get('takeOutCategroy','TakeFoodCategroyController@index');
+        //新增菜品分类
+        $router->get('takeOutCategroy/create','TakeFoodCategroyController@create');
+        $router->post('takeOutCategroy','TakeFoodCategroyController@store');
+        //编辑菜品分类
+        $router->get('takeOutCategroy/{id}/edit','TakeFoodCategroyController@edit');
+        $router->put('takeOutCategroy/{id}','TakeFoodCategroyController@update');
+        //删除菜品分类
+        $router->delete('takeOutCategroy/{id}','TakeFoodCategroyController@destroy');
+
+        //外卖菜品标签
+        $router->get('takeOutTag','TakeFoodTagController@index');
+        //新增外卖菜品标签
+        $router->get('takeOutTag/create','TakeFoodTagController@create');
+        $router->post('takeOutTag','TakeFoodTagController@store');
+        //编辑外卖菜品标签
+        $router->get('takeOutTag/{id}/edit','TakeFoodTagController@edit');
+        $router->put('takeOutTag/{id}','TakeFoodTagController@update');
+        //删除外卖菜品标签
+        $router->delete('takeOutTag/{id}','TakeFoodTagController@destroy');
+
+        //外卖菜品
         $router->get('takeOutPool','TakeOutFoolController@index');
         //新增外卖菜品
         $router->get('takeOutPool/create','TakeOutFoolController@create');
+        $router->post('takeOutPool','TakeOutFoolController@store');
+        //编辑外卖菜品
+        $router->get('takeOutPool/{id}/edit','TakeOutFoolController@edit');
+        $router->put('takeOutPool/{id}','TakeOutFoolController@update');
+        //删除外卖菜品
+        $router->delete('takeOutPool/{id}','TakeOutFoolController@destroy');
     });
     //智慧发现
     $router->group(['prefix'=>'discover'],function ($router){

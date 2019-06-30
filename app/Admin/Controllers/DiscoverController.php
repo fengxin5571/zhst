@@ -59,7 +59,7 @@ class DiscoverController extends AdminController{
     }
     protected function form(){
         $form=new Form(new Discover());
-        $form->text('title','标题')->rules('required');
+        $form->text('title','标题')->required();
         $form->multipleImage('images','轮播图')->rules('required|mimes:jpeg,bmp,png')->removable()->sortable();
         $form->textarea('description','发现简介')->rows();
         return $form;
