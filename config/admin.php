@@ -62,7 +62,7 @@ return [
 
         'namespace' => 'App\\Admin\\Controllers',
 
-        'middleware' => ['web', 'admin','admin.lock'],
+        'middleware' => ['web', 'admin','admin.lock','admin.session'],
     ],
 
     /*
