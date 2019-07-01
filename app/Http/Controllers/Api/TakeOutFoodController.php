@@ -9,6 +9,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Model\TakeFoodCategory;
 use App\Model\TakeFoodPool;
+use App\Model\TakeFoodReplyRelation;
 use Illuminate\Http\Request;
 
 class TakeOutFoodController extends Controller{
@@ -22,7 +23,29 @@ class TakeOutFoodController extends Controller{
         $recommendFood['food_count']=TakeFoodPool::isShow()->isRecommend()->count();
         $recommendFood['food_list']=TakeFoodPool::isShow()->isRecommend()
             ->forPage($request->get('page',1),$request->get('limit',Controller::LIMIT))->get($fields);
+        $recommendFood['food_list']->each(function($item,$key){
+            $item->is_like=TakeFoodReplyRelation::where(['userid'=>$this->user['userId'],'t_food_id'=>$item->id])->count()?true:false;
+        });
         return $this->successResponse($recommendFood);
+    }
+    public function like(Request $request){
+        $food_id=$request->get('food_id');
+        $status=$request->get('status',1);
+        if($food_id){
+            if($status==1){//点赞
+                if(TakeFoodReplyRelation::firstOrCreate(['userid'=>$this->user['userId']],['t_food_id'=>$food_id])){
+                    TakeFoodPool::where('id',$food_id)->increment('likeCount',1);
+                    return $this->successResponse('点赞成功');
+                }
+            }elseif($status==2){//取消
+                TakeFoodReplyRelation::where(['userid'=>$this->user['userId'],'t_food_id'=>$food_id])->delete();
+                TakeFoodPool::where('id',$food_id)->decrement('likeCount',1);
+                return $this->successResponse('取消点赞成功');
+            }
+
+
+        }
+        return $this->response->error('点赞失败',403);
     }
     /**
      * 外卖菜品分类

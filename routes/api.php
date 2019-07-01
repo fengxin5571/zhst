@@ -29,6 +29,8 @@ $api->version('v1', [
             $api->get('category','TakeOutFoodController@category');
             //外卖预定菜品
             $api->get('foods','TakeOutFoodController@foods');
+            //外卖菜品点赞,取消
+            $api->get('like','TakeOutFoodController@like');
         });
         //智慧发现
         $api->group(['prefix'=>'discover'],function($api){
