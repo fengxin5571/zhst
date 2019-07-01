@@ -63,7 +63,7 @@ class TakeOutFoodController extends Controller{
      * @return mixed
      */
     public function foods(Request $request){
-        $fields=['id','cid','description','food_image','ot_price','point','price','sellCount','likeCount'];
+        $fields=['id','cid','name','description','food_image','ot_price','point','price','sellCount','likeCount'];
         $food_list['food_list']=TakeFoodCategory::get(['id','cat_name']);
         $food_list['food_list']->each(function($item,$key) use($fields){
             $item['foods']=TakeFoodPool::where('cid',$item->id)->isShow()->groupBy('cid','id')->get($fields);
