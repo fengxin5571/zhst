@@ -38,4 +38,8 @@ class Cart extends Eloquent
 		'food_id',
 		'cart_num'
 	];
+	//外卖菜品
+	public function takeFood(){
+	    return $this->hasOne(TakeFoodPool::class,'id','food_id');
+    }
 }

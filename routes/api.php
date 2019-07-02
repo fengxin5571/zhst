@@ -34,8 +34,15 @@ $api->version('v1', [
         });
         //购物车
         $api->group(['prefix'=>'cart'],function ($api){
-            //添加购物车
+            //查看购物车
+            $api->get('/','CartController@index');
+            //查看购物车总数
+            $api->get('count','CartController@Cartnum');
+            //添加，减少购物车
             $api->post('add','CartController@add');
+            //删除购物车
+            $api->post('remove','CartController@remove');
+
         });
         //智慧发现
         $api->group(['prefix'=>'discover'],function($api){
