@@ -17,7 +17,7 @@ $api = app('Dingo\Api\Routing\Router');
 
 $api->version('v1', [
     'namespace'=>'App\Http\Controllers\Api',
-    'middleware'=>['bindings'],
+    'middleware'=>['bindings','cors'],
 ],function($api) {
     $api->group(['middleware'=>'authToken'],function($api){//用户验证中间件
         $api->get('/test','testController@index');
@@ -31,6 +31,11 @@ $api->version('v1', [
             $api->get('foods','TakeOutFoodController@foods');
             //外卖菜品点赞,取消
             $api->get('like','TakeOutFoodController@like');
+        });
+        //购物车
+        $api->group(['prefix'=>'cart'],function ($api){
+            //添加购物车
+            $api->post('add','CartController@add');
         });
         //智慧发现
         $api->group(['prefix'=>'discover'],function($api){

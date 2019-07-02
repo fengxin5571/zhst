@@ -28,6 +28,12 @@ class TakeOutFoodController extends Controller{
         });
         return $this->successResponse($recommendFood);
     }
+
+    /**
+     * 外卖菜品点赞取消
+     * @param Request $request
+     * @return mixed
+     */
     public function like(Request $request){
         $food_id=$request->get('food_id');
         $status=$request->get('status',1);
@@ -35,8 +41,8 @@ class TakeOutFoodController extends Controller{
             if($status==1){//点赞
                 if(TakeFoodReplyRelation::firstOrCreate(['userid'=>$this->user['userId']],['t_food_id'=>$food_id])){
                     TakeFoodPool::where('id',$food_id)->increment('likeCount',1);
-                    return $this->successResponse('点赞成功');
                 }
+                return $this->successResponse('点赞成功');
             }elseif($status==2){//取消
                 TakeFoodReplyRelation::where(['userid'=>$this->user['userId'],'t_food_id'=>$food_id])->delete();
                 TakeFoodPool::where('id',$food_id)->decrement('likeCount',1);
