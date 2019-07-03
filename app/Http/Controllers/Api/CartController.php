@@ -32,12 +32,25 @@ class CartController extends Controller{
             'food_id.required'=>'请选择菜品',
             'num.required'=>'数量不能为零',
             'type.required'=>'添加类型不能为空',
+            'food_type.required'=>'菜品类型不能为空'
         ];
         $validator=Validator::make($request->all(),[
+            'food_type'=>'required',
             'type'=>'required',
             'food_id'=>['required',function($attribute, $value, $fail)use($request){
                 //type为1为外卖菜品2为网上订购菜品
-                $foodsku=$request->input('type')==1?TakeFoodPool::class:'';
+                $foodsku=TakeFoodPool::class;
+                //如果是外卖菜品
+                if($request->input('type')==1){
+                    //如果是普通商品
+                    if($request->input('food_type')==1){
+                        $foodsku=TakeFoodPool::class;
+                    }else{//如果是套餐
+                        $foodsku='';
+                    }
+                }else{//如果是网订
+                    $foodsku='';
+                }
                 if(!$food=$foodsku::find($value)){
                     $fail('该菜品不存在');
                     return;
@@ -52,7 +65,8 @@ class CartController extends Controller{
         if($validator->fails()){
             return $this->response->error($validator->errors()->first(),$this->forbidden_code);
         }
-        if($item=$this->cartService->add($request->input('food_id'),$request->input('num'),$request->input('type'),$this->user,$flog)){
+        if($item=$this->cartService
+            ->add($request->input('food_id'),$request->input('num'),$request->input('type'),$request->input('food_type'),$this->user,$flog)){
             $data['cart_count']=Cart::where(['userid'=>$this->user['userId'],'type'=>$request->input('type')])->sum('cart_num');
             $data['food_info']=$item;
             return $this->successResponse($data,'成功');
@@ -65,19 +79,35 @@ class CartController extends Controller{
      * @return mixed
      */
     public function index(Request $request){
-        //type为1为外卖菜品2为网上订购菜品
         $type=$request->input('type',1);
-        $food=$type==1?'takeFood':'';$cart_count=0;$price_count=0;
-        $item['food_list']=Cart::where(['userid'=>$this->user['userId'],'type'=>$type])
-            ->with("{$food}:id,name,food_image,price")->get(['id','food_id','cart_num','created_at']);
-        $item['food_list']->each(function($item,$key) use(&$cart_count,&$price_count){
+        //$food=$type==1?'takeFood':'';
+        $cart_count=0;$price_count=0;
+        $cart=Cart::where(['userid'=>$this->user['userId'],'type'=>$type]);
+        $cartList=Cart::where(['userid'=>$this->user['userId'],'type'=>$type])->get(['id','food_id','cart_num','food_type','created_at']);
+        $data['food_list']=Cart::where(['userid'=>$this->user['userId'],'type'=>$type]);
+        $cartList->each(function ($item,$key) use($type,$cart){
+            //type为1为外卖菜品2为网上订购菜品
+            if($type==1){
+                //如果为普通商品
+                if($item->food_type==1){
+                    $item['food_list']=$cart->with('takeFood:id,name,food_image,price');
+                }
+
+            }else{
+
+            }
+        });
+        $data['food_list']=$cart->get(['id','food_id','cart_num','food_type','created_at']);
+//        $item['food_list']=Cart::where(['userid'=>$this->user['userId'],'type'=>$type])
+//            ->with("{$food}:id,name,food_image,price")->get(['id','food_id','cart_num','created_at']);
+        $data['food_list']->each(function($item,$key) use(&$cart_count,&$price_count){
             $item->foodCountPrice=bcmul($item->takeFood->price,$item->cart_num,2);
             $cart_count+=$item->cart_num;
             $price_count+=$item->foodCountPrice;
         });
-        $item['cart_count']=$cart_count;
-        $item['price_count']=number_format($price_count,2);
-        return $this->successResponse($item);
+        $data['cart_count']=$cart_count;
+        $data['price_count']=number_format($price_count,2);
+        return $this->successResponse($data);
     }
 
     /**
@@ -97,6 +127,12 @@ class CartController extends Controller{
         $data['price_count']=number_format($price_count,2);
         return $this->successResponse($data);
     }
+
+    /**
+     * 清空购物车
+     * @param Request $request
+     * @return mixed
+     */
     public function remove(Request $request)
     {
         $type=$request->input('type',1);

@@ -36,7 +36,8 @@ class Cart extends Eloquent
 		'userid',
 		'type',
 		'food_id',
-		'cart_num'
+		'cart_num',
+        'food_type'
 	];
 	//外卖菜品
 	public function takeFood(){

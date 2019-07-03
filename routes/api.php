@@ -44,6 +44,13 @@ $api->version('v1', [
             $api->post('remove','CartController@remove');
 
         });
+        //订单
+        $api->group(['prefix'=>'order'],function ($api){
+            //订单结算
+            $api->get('confirm','OrderController@confirmOrder');
+            //创建订单
+            $api->post('add','OrderController@add');
+        });
         //智慧发现
         $api->group(['prefix'=>'discover'],function($api){
             //智慧发现接口

@@ -47,6 +47,11 @@ Route::group([
         //删除外卖菜品
         $router->delete('takeOutPool/{id}','TakeOutFoolController@destroy');
     });
+    //订单管理
+    $router->group(['prefix'=>'order'],function($router){
+        //订单列表
+        $router->get('/','OrderController@index');
+    });
     //智慧发现
     $router->group(['prefix'=>'discover'],function ($router){
         //智慧发现列表
