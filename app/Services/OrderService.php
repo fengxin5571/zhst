@@ -8,6 +8,7 @@
 namespace App\Services;
 use App\Model\Cart;
 use App\Model\Order;
+use App\Model\OrderFood;
 use App\Model\TakeFoodPool;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -26,9 +27,8 @@ class OrderService{
         $data['error']=false;
         //开启一个事务
         $data['order']=DB::transaction(function ()use($user,$orderinfo,&$data){
-            $unique=str_random(30);
             //判断订单是否已经生成
-            if(Order::where(['unique'=>$unique,'userid'=>$user['userId']])->first()){
+            if(Order::where(['unique'=>$orderinfo['unique'],'userid'=>$user['userId']])->first()){
                 $data['error']=true;
                 $data['message']='请勿重复提交订单';
                 return;
@@ -49,16 +49,20 @@ class OrderService{
                 'user_address'=>$orderinfo['user_address'],
                 'eat_time'=>isset($orderinfo['eat_time'])?$orderinfo['eat_time']:time(),
                 'get_time'=>isset($orderinfo['get_time'])?$orderinfo['get_time']:time(),
-                'total_num'=>$orderinfo['total_num'],
-                'total_price'=>$orderinfo['total_price'],
                 'mark'=>isset($orderinfo['mark'])?$orderinfo['mark']:'',
-                'unique'=>$unique
+                'unique'=>$orderinfo['unique']
             ]);
-            //$order->save();
-            //dd($order);
+            $order->save();
+            $totalAmount = 0;
+            $totalNum=0;
             $carts_id=explode(',',$orderinfo['carts_id']);
             foreach($carts_id as $cart_id){
                 $cart=Cart::find($cart_id);
+                if(!$cart){
+                    $data['error']=true;
+                    $data['message']='购物车菜品已失效';
+                    return;
+                }
                 //如果为外卖
                 if($orderinfo['order_type']==1){
                     if($cart->food_type==1){//如果是普通菜品
@@ -67,14 +71,22 @@ class OrderService{
                 }else{//如果是网订
 
                 }
+                $totalAmount += bcmul($food->price,$cart->cart_num,2);
+                $totalNum +=$cart->cart_num;
                 $param= array(
                     'order_unique'=>$order->unique,
                     'food_name'   =>$food->name,
                     'food_image'  =>$food->food_image,
                     'food_price'  =>$food->price,
-                    'food_type'   =>$food->
+                    'food_type'   =>$food->food_type,
+                    'food_num'    =>$cart->cart_num,
                 );
+                $orderFood=OrderFood::create($param);
             }
+            //更新订单总价与菜品总量
+            $order->update(['total_price'=>number_format($totalAmount,2),'total_num'=>$totalNum]);
+            Cart::whereIn('id',$carts_id)->where('userid',$user['userId'])->delete();
+            return $order;
         });
         return $data;
     }

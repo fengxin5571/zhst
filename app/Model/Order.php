@@ -45,7 +45,7 @@ class Order extends Eloquent
 		'total_price' => 'float(10,2)',
 		'paid' => 'int',
 		'status' => 'int',
-		'refund_price' => 'float'
+		'refund_price' => 'float(10,2)'
 	];
 
 	protected $dates = [
@@ -88,5 +88,9 @@ class Order extends Eloquent
             usleep(100);
         }
         return $no;
+    }
+    //订单菜品
+    public function orderFoods(){
+        return $this->hasMany(OrderFood::class,'order_unique','unique');
     }
 }

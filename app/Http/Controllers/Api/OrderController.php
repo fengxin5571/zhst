@@ -11,9 +11,7 @@ use App\Model\Cart;
 use App\Model\TakeFoodPool;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class OrderController extends Controller{
     protected $orderService;
@@ -101,10 +99,7 @@ class OrderController extends Controller{
         $type=$request->input('order_type');
         $message=[
             'order_type.required'=>'订单类型不能为空',
-            'total_num.required'=>'订单菜品总数不能为空',
-            'total_price.required'=>'订单总价不能为空',
-            'total_price.numeric'=>'订单总价必须是数字',
-            'carts_id.required'=>'购物id不能为空',
+            'unique.required'=>'唯一标识不能为空',
             'real_name.required'=>'订餐人姓名不能为空',
             'user_phone.required'=>'订餐人电话不能为空',
             'user_phone.is_mobile'=>'订餐人电话格式不正确',
@@ -112,9 +107,36 @@ class OrderController extends Controller{
         ];
         $rule=[
             'order_type'=>'required',
-            'total_num'=>'required',
-            'total_price'=>'required|numeric',
-            'carts_id'=>'required',
+            'unique'=>'required',
+            'carts_id'=>['required',function($attribute, $value, $fail) use($request){
+                if(!$value){
+                    $fail('购物车id不能为空');
+                    return;
+                }
+                $value=explode(',',$value);
+                $cart_list=Cart::whereIn('id',$value)->where('userid',$this->user['userId'])->get();
+                if(!$cart_list->toArray()){
+                    $fail('购物车菜品失效');
+                    return;
+                }
+                //订单类型1为外卖菜品；2为网上订餐
+                if($request->input('order_type')==1){
+                    $cart_list->each(function ($item,$key)use($fail){
+                        //如果菜品类型普通菜品
+                        if($item->food_type==1){
+                            //不存在数据或已经下架
+                            if(!$item->takeFood||!$item->takeFood->is_show){
+                                $fail('购物车菜品失效');
+                                return;
+                            }
+                        }else{//如果为套餐
+
+                        }
+                    });
+                }else{//如果为网订
+
+                }
+            }],
             'real_name'=>'required',
             'user_phone'=>'required|is_mobile',
             'pay_type'=>'required',
@@ -144,7 +166,7 @@ class OrderController extends Controller{
         $orderinfo=$request->all();
         $data=$this->orderService->store($this->user,$orderinfo);
         if(!$data['error']){
-            return $this->successResponse('');
+            return $this->successResponse($data['order']);
         }
         return $this->response->error($data['message'],$this->forbidden_code);
     }

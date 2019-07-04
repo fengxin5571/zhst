@@ -29,7 +29,7 @@ class OrderFood extends Eloquent
 	protected $table = 'order_food';
 
 	protected $casts = [
-		'food_price' => 'float',
+		'food_price' => 'float(10,2)',
 		'food_type' => 'int',
 		'food_num' => 'int'
 	];
