@@ -18,9 +18,8 @@ class OrderController extends AdminController
 {
     protected static $status = [
         '1' => ['-1' => '申请退款', '0' => '待发出', '1' => '待取餐', '2' => '已取餐', '3' => '待评价', '-2' => '已退款'],
-        '2' => [],
+        '2' => ['0'=>'待确认'],
     ];
-
     public function index(Content $content)
     {
         return $content->header('订单管理')
@@ -32,11 +31,9 @@ class OrderController extends AdminController
     protected function grid()
     {
         $grid = new Grid(new Order());
-
         $grid->column('id', "ID");
-        $grid->column('order_sn', '订单号');
-        $grid->column('order_type', '类型')->using(['1' => '外卖', '2' => '网订']);
-        $grid->column('total_num', '菜品总数');
+        $grid->column('order_sn', '订单号')->copyable();
+        $grid->column('order_type', '类型')->using(['1'=>'外卖','2'=>'网订']);
         $grid->orderFoods('菜品信息')->display(function ($orderFoods) {
             $orderFoods = array_map(function ($food) {
                 return <<<EOT
@@ -54,15 +51,42 @@ EOT;
 
             return join('&nbsp;', $orderFoods);
         });
+        $grid->column('total_num', '菜品总数')->style('text-align: center;');
         $grid->column('real_name', '订餐人');
         $grid->column('user_phone', '订餐人电话');
-        $grid->column('total_price', '订单总价');
-        $grid->column('paid', '支付状态')->using(['0' => '未支付', '2' => '已支付']);
+        $grid->column('total_price', '订单总价')->style('text-align: center;');
+        $grid->column('paid', '支付状态')->using(['0' => '未支付', '1' => '已支付']);
         $grid->column('pay_type', '支付方式')->using(['weixin' => '微信支付', 'allipay' => '支付宝', 'card' => '一卡通']);
-        $grid->column('status', '订单状态')->using(self::$status[1]);
-        $grid->column('created_at', '订单时间');
-        $grid->actions(function ($actions) {
+        $grid->column('订单状态')->display(function(){
+            return $this->order_type==1?self::$status[1][$this->status]:self::$status[2][$this->status];
+        });
+        $grid->column('created_at', '订单时间')->sortable();
 
+        $grid->filter(function ($filter){
+            $filter->column(1/2, function ($filter) {
+                $filter->equal('order_type','订单类型')->select([''=>'所有','1'=>'外卖','2'=>'网订']);
+                $filter->equal('real_name','订餐人')->placeholder('请输入订餐人姓名查询');
+                $filter->equal('user_phone','电话')->placeholder('请输入订餐人电话查询');
+                $filter->equal('pay_type','支付方式')->radio([
+                    'weixin'   => ' 微信',
+                    'allipay'  => ' 支付宝',
+                    'card'     => ' 一卡通',
+                ]);
+            });
+            $filter->column(1/2, function ($filter) {
+                $filter->like('order_sn','订单号')->placeholder('请输入订单号查询');
+                $filter->between('created_at','订单时间')->datetime();
+                $filter->between('total_price','订单总价');
+                $filter->equal('paid','支付状态')->radio([
+                    ''   => ' 所有',
+                    0    => ' 未支付',
+                    1    => ' 已支付',
+                ]);
+
+            });
+        });
+        $grid->actions(function ($actions) {
+//
         });
         $grid->disableCreateButton();
         return $grid;
