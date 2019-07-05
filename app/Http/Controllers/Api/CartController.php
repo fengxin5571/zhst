@@ -136,9 +136,8 @@ class CartController extends Controller{
     public function remove(Request $request)
     {
         $type=$request->input('type',1);
-        if($this->cartService->remove($type,$this->user)){
-            return $this->successResponse('','成功');
-        }
-        return $this->response->error('失败',$this->forbidden_code);
+        $this->cartService->remove($type,$this->user);
+        return $this->successResponse('','成功');
+
     }
 }
