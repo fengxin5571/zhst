@@ -51,6 +51,8 @@ Route::group([
     $router->group(['prefix'=>'order'],function($router){
         //订单列表
         $router->get('/','OrderController@index');
+        //查看订单
+        $router->get('/{id}','OrderController@show');
     });
     //智慧发现
     $router->group(['prefix'=>'discover'],function ($router){

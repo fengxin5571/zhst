@@ -90,7 +90,7 @@ class CartController extends Controller{
             if($type==1){
                 //如果为普通商品
                 if($item->food_type==1){
-                    $item['food_list']=$cart->with('takeFood:id,name,food_image,price');
+                    $item['food_list']=$cart->with('takeFood:id,name,food_image,price,description');
                 }
 
             }else{
