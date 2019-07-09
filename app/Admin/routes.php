@@ -46,6 +46,24 @@ Route::group([
         $router->put('takeOutPool/{id}','TakeOutFoolController@update');
         //删除外卖菜品
         $router->delete('takeOutPool/{id}','TakeOutFoolController@destroy');
+
+        //网订类型管理
+        $router->get('/reserveType','ReserveTypeController@index');
+        //编辑网订类型
+        $router->get('/reserveType/{id}/edit','ReserveTypeController@edit');
+        $router->put('/reserveType/{id}','ReserveTypeController@update');
+
+        //网订分类管理
+        $router->get('/reserveFoodCategory','ReserveFoodCategoryController@index');
+        //新增网订菜品分类
+        $router->get('/reserveFoodCategory/create','ReserveFoodCategoryController@create');
+        $router->post('/reserveFoodCategory','ReserveFoodCategoryController@store');
+        //编辑网订菜品分类
+        $router->get('/reserveFoodCategory/{id}/edit','ReserveFoodCategoryController@edit');
+        $router->put('/reserveFoodCategory/{id}','ReserveFoodCategoryController@update');
+        //删除网订菜品分类
+        $router->delete('/reserveFoodCategory/{id}','ReserveFoodCategoryController@destroy');
+
     });
     //订单管理
     $router->group(['prefix'=>'order'],function($router){
