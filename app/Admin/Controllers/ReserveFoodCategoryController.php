@@ -35,6 +35,13 @@ class ReserveFoodCategoryController extends AdminController{
             ->breadcrumb(['text' => '新增网订分类'])
             ->body($this->form());
     }
+
+    /**
+     * 编辑网订分类
+     * @param mixed $id
+     * @param Content $content
+     * @return Content
+     */
     public function edit($id,Content $content){
         return $content->header('编辑网订分类')
             ->description('详细')
