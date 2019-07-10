@@ -64,6 +64,28 @@ Route::group([
         //删除网订菜品分类
         $router->delete('/reserveFoodCategory/{id}','ReserveFoodCategoryController@destroy');
 
+        //网订菜品标签
+        $router->get('/reserveTag','ReserveFoodTagController@index');
+        //新增网订菜品标签
+        $router->get('/reserveTag/create','ReserveFoodTagController@create');
+        $router->post('reserveTag','ReserveFoodTagController@store');
+        //编辑网订菜品标签
+        $router->get('/reserveTag/{id}/edit','ReserveFoodTagController@edit');
+        $router->put('/reserveTag/{id}','ReserveFoodTagController@update');
+        //删除网订菜品标签
+        $router->delete('/reserveTag/{id}','ReserveFoodTagController@destroy');
+
+        //网订菜品
+        $router->get('/reservePool','ReserveFoodPoolController@index');
+        //新增网订菜品
+        $router->get('/reservePool/create','ReserveFoodPoolController@create');
+        $router->post('reservePool','ReserveFoodPoolController@store');
+        //编辑菜品
+        $router->get('/reservePool/{id}/edit','ReserveFoodPoolController@edit');
+        $router->put('/reservePool/{id}','ReserveFoodPoolController@store');
+        //删除菜品
+        $router->delete('/reservePool/{id}','ReserveFoodPoolController@destroy');
+
     });
     //订单管理
     $router->group(['prefix'=>'order'],function($router){

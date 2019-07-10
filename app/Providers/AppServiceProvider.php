@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Exceptions\ExampleException;
+use Dingo\Api\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 

@@ -51,7 +51,7 @@ class TakeOutFoodController extends Controller{
 
 
         }
-        return $this->response->error('点赞失败',403);
+        return $this->response->error('点赞失败',$this->forbidden_code);
     }
     /**
      * 外卖菜品分类

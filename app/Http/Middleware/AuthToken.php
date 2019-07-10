@@ -27,6 +27,7 @@ class AuthToken
 //            ]);
 //            $body = $response->getBody();
 //            $rest_json=json_decode($body->getContents(),true);
+//            //dd($rest_json);
 //            if(!$rest_json||$rest_json['code']==700){
 //                throw  new \Exception();
 //            }
