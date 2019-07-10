@@ -82,7 +82,7 @@ Route::group([
         $router->post('reservePool','ReserveFoodPoolController@store');
         //编辑菜品
         $router->get('/reservePool/{id}/edit','ReserveFoodPoolController@edit');
-        $router->put('/reservePool/{id}','ReserveFoodPoolController@store');
+        $router->put('/reservePool/{id}','ReserveFoodPoolController@update');
         //删除菜品
         $router->delete('/reservePool/{id}','ReserveFoodPoolController@destroy');
 
