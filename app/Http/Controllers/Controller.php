@@ -24,7 +24,7 @@ class Controller extends BaseController
         $this->middleware(function ($request, $next) {
             $this->user=$request->get('user');
             if(empty($this->user)){
-                return $this->response->error('用户token验证失败',700);
+                return $this->response->error('用户token验证失败',201);
             }
             return $next($request);
         });

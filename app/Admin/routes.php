@@ -86,6 +86,20 @@ Route::group([
         //删除菜品
         $router->delete('/reservePool/{id}','ReserveFoodPoolController@destroy');
 
+
+    });
+    //套餐管理
+    $router->group(['prefix'=>'package'],function ($router){
+        //套餐列表
+        $router->get('/','PackageFoodController@index');
+        //新增套餐
+        $router->get('/create','PackageFoodController@create');
+        $router->post('/','PackageFoodController@store');
+        //编辑套餐
+        $router->get('/{id}/edit','PackageFoodController@edit');
+        $router->put('/{id}','PackageFoodController@update');
+        //删除套餐
+        $router->delete('/{id}','PackageFoodController@destroy');
     });
     //订单管理
     $router->group(['prefix'=>'order'],function($router){
