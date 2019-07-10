@@ -32,6 +32,12 @@ $api->version('v1', [
             //外卖菜品点赞,取消
             $api->get('like','TakeOutFoodController@like');
         });
+
+        //网上订餐
+        $api->group(['prefix'=>'reserve'],function ($api){
+
+        });
+
         //购物车
         $api->group(['prefix'=>'cart'],function ($api){
             //查看购物车
@@ -44,6 +50,7 @@ $api->version('v1', [
             $api->post('remove','CartController@remove');
 
         });
+
         //订单
         $api->group(['prefix'=>'order'],function ($api){
             //订单结算
@@ -51,6 +58,7 @@ $api->version('v1', [
             //创建订单
             $api->post('add','OrderController@add');
         });
+
         //智慧发现
         $api->group(['prefix'=>'discover'],function($api){
             //智慧发现接口
@@ -58,6 +66,11 @@ $api->version('v1', [
         });
 
     });
+    //获取菜品类型select联动
+    $api->get('/food_type','FoodsController@type');
+    //获取菜品的select联动
+    $api->get('/foods','FoodsController@index');
+
 });
 //Route::middleware('auth:api')->get('/user', function (Request $request) {
 //    return $request->user();

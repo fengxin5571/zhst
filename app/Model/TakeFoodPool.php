@@ -73,12 +73,12 @@ class TakeFoodPool extends Eloquent
     public function scopeIsRecommend($query){
 	    return $query->where('is_recommend',1);
     }
-	public static function boot(){
-	    parent::boot();
-        static ::deleted(function($takeFood){
-            @Storage::disk('admin')->delete($takeFood->food_image);
-        });
-    }
+//	public static function boot(){
+//	    parent::boot();
+//        static ::deleted(function($takeFood){
+//            @Storage::disk('admin')->delete($takeFood->food_image);
+//        });
+//    }
 	public function foodCategory(){
 	    return $this->hasOne(TakeFoodCategory::class,'id','cid');
     }

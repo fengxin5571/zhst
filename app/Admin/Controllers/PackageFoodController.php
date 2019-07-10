@@ -12,6 +12,7 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
+use Illuminate\Support\MessageBag;
 
 class PackageFoodController extends AdminController{
     /**
@@ -74,6 +75,7 @@ EOT;
         $grid->column('package_price','套餐价格')->display(function($package_price){
             return '￥'.$package_price;
         });
+        $grid->column('is_show','状态')->using(['0'=>'<span class=\'label label-danger\'>未上架</span>','1'=>'<span class=\'label label-success\'>已上架</span>']);
         $grid->column('created_at','添加时间')->sortable();
         $grid->filter(function($filter){
             $filter->like('package_name','套餐名称')->placeholder('请输入套餐名称查询');
@@ -92,7 +94,17 @@ EOT;
         $form->textarea('package_description','菜品简介')->rows(5);
         $form->currency('package_price','套餐价格')->symbol('￥')->required();
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
-        $form->listbox('foods','套餐菜品')->options(ReserveFoodPool::all()->pluck('name','id'));
+        $form->listbox('foods','套餐菜品')->options(ReserveFoodPool::where('is_show',1)->pluck('name','id'));
+        $form->saving(function(Form $form){
+            if(!array_filter($form->foods)){
+               $message=[
+                   'title'=>'错误',
+                   'message'=>'套餐菜品至少选一项',
+               ];
+               $error=new MessageBag($message);
+               return back()->with(compact('error'));
+            }
+        });
         return $form;
     }
 }

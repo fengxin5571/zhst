@@ -39,7 +39,9 @@ class PackageFood extends Eloquent
 		'package_description',
 		'package_price',
 		'is_show',
+        'food_type',
 	];
+
 	public function foods(){
 	    return $this->belongsToMany(ReserveFoodPool::class,'package_food_relation','pid','food_id');
     }

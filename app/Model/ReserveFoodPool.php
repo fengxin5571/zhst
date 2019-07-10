@@ -35,7 +35,7 @@ use Reliese\Database\Eloquent\Model as Eloquent;
 class ReserveFoodPool extends Eloquent
 {
 	protected $table = 'reserve_food_pool';
-
+    protected static $pid=0;
 	protected $casts = [
 		'cid' => 'int',
 		'price' => 'float(10,2)',
@@ -66,6 +66,20 @@ class ReserveFoodPool extends Eloquent
 		'calorie',
 		'food_type'
 	];
+    public static function boot(){
+        parent::boot();
+        static ::deleting(function ($reserveFood){
+            self::$pid=$pid=PackageFoodRelation::where('food_id',$reserveFood->id)->value('pid');
+        });
+        static ::deleted(function($reserveFood){
+              if(self::$pid){
+                  $package_food_count=PackageFood::where('id',self::$pid)->first()->foods->count();
+                  if($package_food_count==0){
+                      PackageFood::where('id',self::$pid)->delete();
+                  }
+              }
+        });
+    }
     public function getFoodImageAttribute($value)
     {
         return config('filesystems.disks.admin.url').'/'.$value;
