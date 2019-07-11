@@ -80,7 +80,6 @@ class CartController extends Controller{
      */
     public function index(Request $request){
         $type=$request->input('type',1);
-        //$food=$type==1?'takeFood':'';
         $cart_count=0;$price_count=0;
         $cart=Cart::where(['userid'=>$this->user['userId'],'type'=>$type]);
         $cartList=Cart::where(['userid'=>$this->user['userId'],'type'=>$type])->get(['id','food_id','type','cart_num','food_type','created_at']);
@@ -98,13 +97,12 @@ class CartController extends Controller{
             }
         });
         $data['food_list']=$cart->get(['id','food_id','type','cart_num','food_type','created_at']);
-//        $item['food_list']=Cart::where(['userid'=>$this->user['userId'],'type'=>$type])
-//            ->with("{$food}:id,name,food_image,price")->get(['id','food_id','cart_num','created_at']);
         $data['food_list']->each(function($item,$key) use(&$cart_count,&$price_count){
             $item->foodCountPrice=bcmul($item->takeFood->price,$item->cart_num,2);
             //计算购物车总数,购物车总价
             $cart_count+=$item->cart_num;
             $price_count+=$item->foodCountPrice;
+            $item->num=0;
         });
         $data['cart_count']=$cart_count;
         $data['price_count']=number_format($price_count,2);

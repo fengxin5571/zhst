@@ -13,6 +13,7 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
+use Illuminate\Support\MessageBag;
 
 class ReserveFoodPoolController extends AdminController{
     /**
@@ -100,6 +101,16 @@ class ReserveFoodPoolController extends AdminController{
         $form->number('weight','菜品重量(单位：K)')->min(1)->default(1);
         $form->number('calorie','卡路里(100K)')->min(0)->default(0);
         $form->multipleSelect('tags','菜品标签')->options(ReserveFoodTag::all()->pluck('r_tag_name','id'));
+        $form->saving(function(Form $form){
+            if(empty((float)$form->price)){
+                $message=[
+                    'title'=>'错误',
+                    'message'=>'菜品价格不能为空'
+                ];
+                $error=new MessageBag($message);
+                return back()->with(compact('error'));
+            }
+        });
         return $form;
     }
 }

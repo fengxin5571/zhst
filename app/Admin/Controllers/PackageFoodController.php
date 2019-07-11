@@ -96,6 +96,14 @@ EOT;
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
         $form->listbox('foods','套餐菜品')->options(ReserveFoodPool::where('is_show',1)->pluck('name','id'));
         $form->saving(function(Form $form){
+            if(empty((float)$form->package_price)){
+                $message=[
+                    'title'=>'错误',
+                    'message'=>'套餐价格不能为空',
+                ];
+                $error=new MessageBag($message);
+                return back()->with(compact('error'));
+            }
             if(!array_filter($form->foods)){
                $message=[
                    'title'=>'错误',
@@ -104,6 +112,7 @@ EOT;
                $error=new MessageBag($message);
                return back()->with(compact('error'));
             }
+
         });
         return $form;
     }
