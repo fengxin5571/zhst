@@ -79,6 +79,7 @@ EOT;
         $grid->column('created_at','添加时间')->sortable();
         $grid->filter(function($filter){
             $filter->like('package_name','套餐名称')->placeholder('请输入套餐名称查询');
+            $filter->between('package_price','套餐价格范围');
             $filter->equal('is_show','状态')->radio([
                 ''   => '全部',
                 0    => '未上架',

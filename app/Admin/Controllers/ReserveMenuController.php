@@ -90,7 +90,7 @@ EOT;
             }
 
         });
-        $grid->column('weekly','星期排期')->label();
+        $grid->column('weekly','星期排期')->help('每个数字代表对应的星期，如1；星期一')->label();
         $grid->column('created_at','添加时间')->sortable();
         $grid->tools(function ($tools) {
             $tools->append(new ReserveMenuGender());
@@ -101,6 +101,10 @@ EOT;
         });
         $grid->filter(function($filter){
             $filter->equal('food_type','菜品类型')->select(['1'=>'普通菜品','2'=>'菜品套餐']);
+            $filter->where(function ($query) {
+                $query->whereRaw("find_in_set('".$this->input."',weekly)");
+            },'星期排期')->radio($this->weeklyList);
+
         });
         return $grid;
     }
