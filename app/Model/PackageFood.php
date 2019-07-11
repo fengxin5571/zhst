@@ -41,7 +41,9 @@ class PackageFood extends Eloquent
 		'is_show',
         'food_type',
 	];
-
+	public function getPackageImageAttribute($value){
+        return config('filesystems.disks.admin.url').'/'.$value;
+    }
 	public function foods(){
 	    return $this->belongsToMany(ReserveFoodPool::class,'package_food_relation','pid','food_id');
     }
