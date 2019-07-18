@@ -111,7 +111,7 @@ EOT;
 
         $grid->filter(function ($filter){
             $filter->column(1/2, function ($filter) {
-                $filter->equal('order_type','订单类型')->select([''=>'所有','1'=>'外卖','2'=>'网订']);
+                $filter->equal('order_type','订单类型')->select([''=>'所有','1'=>'外卖']);
                 $filter->equal('real_name','订餐人')->placeholder('请输入订餐人姓名查询');
                 $filter->equal('user_phone','电话')->placeholder('请输入订餐人电话查询');
                 $filter->equal('pay_type','支付方式')->radio([

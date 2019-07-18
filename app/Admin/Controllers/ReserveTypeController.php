@@ -42,7 +42,6 @@ class ReserveTypeController extends AdminController{
         $grid->column('id','ID')->sortable();
         $grid->column('reserve_type_name','类型名称')->editable();
         $grid->column('reserve_type_image','类型封面')->lightbox(['width' => 50, 'height' => 50]);
-        $grid->column('reserve_type_seting','类型菜品设置')->using(['1'=>'普通菜品','2'=>'菜品套餐']);
         $grid->actions(function ($actions) {
             $actions->disableView();
             $actions->disableDelete();
@@ -59,7 +58,6 @@ class ReserveTypeController extends AdminController{
         $form=new Form(new ReserveType());
         $form->text('reserve_type_name','类型名称');
         $form->image('reserve_type_image','类型封面')->rules('required|mimes:jpeg,bmp,png')->required();
-        $form->radio('reserve_type_seting','类型菜品设置')->options(['1'=>'普通菜品','2'=>'菜品套餐'])->default(1);
         return $form;
     }
 }

@@ -58,7 +58,6 @@ class ReserveMenuController extends AdminController{
             $grid->model()->where('reserve_type', \Request::get('gender',1));
         }
         $grid->column('id','ID')->sortable();
-        $grid->column('food_type','菜品类型')->using(['1'=>'普通菜品','2'=>'菜品套餐'])->sortable();
         $grid->column('菜品信息')->display(function(){
 
             if($this->food_type==1){//如果是普通菜品
@@ -71,19 +70,6 @@ class ReserveMenuController extends AdminController{
                      </span> 
                      <span>{$food['name']}</span> 
                      <span> | ￥{$food['price']}</span>
-                 </p>   
-             </div>   
-EOT;
-            }else{//如果是菜品套餐
-                $food=PackageFood::where('id',$this->food_id)->first();
-                return <<<EOT
-             <div class="layui-table-cell laytable-cell-1-0-2">   
-                 <p> 
-                     <span> 
-                        <img style="width: 30px;height: 30px;margin:0;cursor: pointer;" src="{$food['package_image']}"> 
-                     </span> 
-                     <span>{$food['package_name']}</span> 
-                     <span> | ￥{$food['package_price']}</span>
                  </p>   
              </div>   
 EOT;
@@ -100,7 +86,6 @@ EOT;
             $actions->disableView();
         });
         $grid->filter(function($filter){
-            $filter->equal('food_type','菜品类型')->select(['1'=>'普通菜品','2'=>'菜品套餐']);
             $filter->where(function ($query) {
                 $query->whereRaw("find_in_set('".$this->input."',weekly)");
             },'星期排期')->radio($this->weeklyList);
@@ -110,8 +95,8 @@ EOT;
     }
     protected function form(){
         $form=new Form(new ReserveMenu());
-        $form->select('reserve_type','网订类型')->options(ReserveType::all()->pluck('reserve_type_name','id'))->load('food_id','/api/food_type')->required();
-        $form->multipleSelect('food_id','菜品')->required();
+        $form->select('reserve_type','网订类型')->options(ReserveType::all()->pluck('reserve_type_name','id'))->required();
+        $form->multipleSelect('food_id','菜品')->options(ReserveFoodPool::where('is_show',1)->pluck('name','id'))->required();
         $form->checkbox('weekly','星期排期')->options($this->weeklyList);
         $form->saving(function (Form $form){
             $message=['title'=> '错误'];
@@ -146,7 +131,7 @@ EOT;
                             $insert=[
                                 'reserve_type'=>$form->reserve_type,
                                 'food_id'=>$v,
-                                'food_type'=>ReserveType::where('id',$form->reserve_type)->value('reserve_type_seting'),
+                                'food_type'=>1,
                                 'weekly'   =>$weekly,
                                 'created_at'=>date('Y-m-d h:i:s', time()),
                                 'updated_at'=>date('Y-m-d h:i:s', time()),
