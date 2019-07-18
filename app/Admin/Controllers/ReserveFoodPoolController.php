@@ -61,13 +61,12 @@ class ReserveFoodPoolController extends AdminController{
             }, $tags);
             return join('&nbsp;', $tags);
         });
-        $grid->column('name','菜品名称')->editable();
+        $grid->column('name','菜品名称');
         $grid->column('food_image','菜品封面')->lightbox(['width' => 50, 'height' => 50]);
         $grid->column('price','菜品价格')->display(function($price){
             return '￥'.$price;
         })->sortable();
         $grid->column('is_show','状态')->using(['0'=>'<span class=\'label label-danger\'>未上架</span>','1'=>'<span class=\'label label-success\'>已上架</span>']);
-        $grid->column('sellCount','销量')->sortable();
         $grid->column('likeCount','点赞数')->sortable();
         $grid->column('created_at','添加时间')->sortable();
         $grid->filter(function($filter){

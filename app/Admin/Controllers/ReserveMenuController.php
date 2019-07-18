@@ -65,8 +65,8 @@ class ReserveMenuController extends AdminController{
                 return <<<EOT
              <div class="layui-table-cell laytable-cell-1-0-2">   
                  <p> 
-                     <span> 
-                        <img style="width: 30px;height: 30px;margin:0;cursor: pointer;" src="{$food['food_image']}"> 
+                     <span style="padding-right: 10px">              
+                          <img style="width: 30px;height: 30px;margin:0;cursor: pointer;" src="{$food['food_image']}" class="img img-thumbnail"> 
                      </span> 
                      <span>{$food['name']}</span> 
                      <span> | ￥{$food['price']}</span>

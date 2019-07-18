@@ -56,7 +56,7 @@ class TakeOutFoolController extends AdminController{
             }, $tags);
             return join('&nbsp;', $tags);
         });
-        $grid->column('name','菜品名称')->editable();
+        $grid->column('name','菜品名称');
         $grid->column('food_image','菜品封面')->lightbox(['width' => 50, 'height' => 50]);
         $grid->column('price','菜品价格')->display(function($price){
             return '￥'.$price;
