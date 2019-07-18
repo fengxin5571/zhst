@@ -64,7 +64,8 @@ class ReserveFoodPool extends Eloquent
 		'mer_id',
 		'weight',
 		'calorie',
-		'food_type'
+		'food_type',
+        'cook'
 	];
     public static function boot(){
         parent::boot();

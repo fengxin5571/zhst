@@ -66,6 +66,13 @@ class ReserveFoodPoolController extends AdminController{
         $grid->column('price','菜品价格')->display(function($price){
             return '￥'.$price;
         })->sortable();
+        $grid->column('cook','厨师')->display(function($cook){
+            $text='暂无厨师';
+            if($cook){
+                $text=$cook;
+            }
+            return $text;
+        });
         $grid->column('is_show','状态')->using(['0'=>'<span class=\'label label-danger\'>未上架</span>','1'=>'<span class=\'label label-success\'>已上架</span>']);
         $grid->column('likeCount','点赞数')->sortable();
         $grid->column('created_at','添加时间')->sortable();
@@ -95,6 +102,7 @@ class ReserveFoodPoolController extends AdminController{
         $form->image('food_image','菜品封面')->rules('required|mimes:jpeg,bmp,png')->required();
         $form->currency('ot_price','原价价格')->symbol('￥')->required();
         $form->currency('price','菜品价格')->symbol('￥')->required();
+        $form->text('cook','厨师');
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
         $form->divider('规格参数');
         $form->number('weight','菜品重量(单位：K)')->min(1)->default(1);

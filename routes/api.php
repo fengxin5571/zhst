@@ -35,7 +35,14 @@ $api->version('v1', [
 
         //网上订餐
         $api->group(['prefix'=>'reserve'],function ($api){
-
+            //网订类型
+            $api->get('type','ReserveFoodController@type');
+            //网订菜品分类
+            $api->get('category','ReserveFoodController@category');
+            //网订菜品
+            $api->get('food','ReserveFoodController@food');
+            //今日菜谱
+            $api->get('todayFood','ReserveFoodController@today');
         });
 
         //购物车
