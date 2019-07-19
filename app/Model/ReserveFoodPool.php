@@ -65,6 +65,7 @@ class ReserveFoodPool extends Eloquent
 		'weight',
 		'calorie',
 		'food_type',
+        'is_today',
         'cook'
 	];
     public static function boot(){

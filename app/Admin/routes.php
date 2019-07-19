@@ -77,6 +77,8 @@ Route::group([
 
         //网订菜品
         $router->get('/reservePool','ReserveFoodPoolController@index');
+        //网订菜品批量操作
+        $router->post('/reservePool/today','ReserveFoodPoolController@today');
         //新增网订菜品
         $router->get('/reservePool/create','ReserveFoodPoolController@create');
         $router->post('reservePool','ReserveFoodPoolController@store');
