@@ -18,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 
 class ReserveFoodPoolController extends AdminController{
-    protected $today=['0'=>'无','1'=>'早餐','2'=>'午餐','3'=>'全部'];
+    protected $today=['0'=>'无','1'=>'早餐','2'=>'午餐'];
     /**
      * 网订菜品列表
      * @param Content $content
@@ -100,7 +100,6 @@ class ReserveFoodPoolController extends AdminController{
                 $batch->add('今日菜谱-无', new ReserveFoodToday(0));
                 $batch->add('今日菜谱-早餐', new ReserveFoodToday(1));
                 $batch->add('今日菜谱-午餐', new ReserveFoodToday(2));
-                $batch->add('今日菜谱-全部', new ReserveFoodToday(3));
             });
         });
         return $grid;

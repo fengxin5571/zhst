@@ -58,7 +58,17 @@ class ReserveFoodController extends Controller{
         });
         return $this->successResponse($data);
     }
-    public function today(){
 
+    /**
+     * 今日菜谱
+     * @param Request $request
+     * @return mixed
+     */
+    public function today(Request $request){
+        $today_type=$request->input('type',1);
+        $data['food_list']=ReserveFoodPool::where('is_today',$today_type)->isShow()->get([
+            'id','cid','name','description','cook','food_image','price','ot_price','point','likeCount'
+            ]);
+        return $this->successResponse($data);
     }
 }

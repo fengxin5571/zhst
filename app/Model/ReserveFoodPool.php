@@ -86,6 +86,10 @@ class ReserveFoodPool extends Eloquent
     {
         return config('filesystems.disks.admin.url').'/'.$value;
     }
+    //上架网订菜品
+    public function scopeIsShow($query){
+        return $query->where('is_show',1);
+    }
 	//菜品分类
     public function foodCategory(){
         return $this->hasOne(ReserveFoodCategory::class,'id','cid');
