@@ -28,4 +28,8 @@ class ReserveType extends Eloquent
 		'reserve_type_name',
         'reserve_type_image'
 	];
+    public function getReserveTypeImageAttribute($value)
+    {
+        return config('filesystems.disks.admin.url').'/'.$value;
+    }
 }
