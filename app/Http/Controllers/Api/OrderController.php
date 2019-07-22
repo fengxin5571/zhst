@@ -8,10 +8,14 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Model\Cart;
+use App\Model\Order;
+use App\Model\ReserveOrder;
+use App\Model\ReserveType;
 use App\Model\TakeFoodPool;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class OrderController extends Controller{
     protected $orderService;
@@ -169,5 +173,48 @@ class OrderController extends Controller{
             return $this->successResponse($data['order']);
         }
         return $this->response->error($data['message'],$this->forbidden_code);
+    }
+
+    /**
+     * 提交网订预定单
+     * @param Request $request
+     * @return mixed
+     */
+    public function reserveAdd(Request $request){
+        $sn=Order::findAvailableNo();
+        $message=[
+            'unique.required'=>'唯一标识不能为空',
+            'unique.unique'=>'请勿重复提交预定',
+            'real_name.required'=>'订餐人姓名不能为空',
+            'user_phone.required'=>'订餐人电话不能为空',
+            'user_phone.is_mobile'=>'订餐人电话格式不正确',
+            'eat_people.required'=>'就餐人数不能为空',
+            'eat_people.numeric'=>'就餐人数必须为数字',
+            'eat_people.gt'=>'就餐人数必须大于0',
+            'eat_time.required'=>'就餐时间不能为空',
+            'reserve_type.required'=>'网订类型id不能为空',
+            'reserve_type.numeric'=>'网订类型id必须为数字',
+        ];
+        $validator=Validator::make($request->all(),[
+            'unique'=>'required|unique:order,unique',
+            'real_name'=>'required',
+            'user_phone'=>'required|is_mobile',
+            'eat_people'=>'required|numeric|gt:0',
+            'eat_time'  =>'required',
+            'reserve_type'=>'required|numeric'
+
+        ],$message);
+        if($validator->fails()){
+            return $this->response->error($validator->errors()->first(),$this->forbidden_code);
+        }
+        $data=$request->all();
+        $data['order_sn']=$sn;
+        $data['order_type']=2;
+        $data['userid']=$this->user['userId'];
+        if(!$order=Order::create($data)){
+            return $this->response->error('预定失败',$this->forbidden_code);
+        }
+        $order->reserve_name=ReserveType::where('id',$order->reserve_type)->value('reserve_type_name');
+        return $this->successResponse($order);
     }
 }

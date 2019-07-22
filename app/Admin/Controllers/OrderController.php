@@ -78,6 +78,7 @@ EOT;
     protected function grid()
     {
         $grid = new Grid(new Order());
+        $grid->model()->where('order_type',1);
         $grid->column('id', "ID");
         $grid->column('order_sn', '订单号')->copyable();
         $grid->column('order_type', '类型')->using(['1'=>'外卖','2'=>'网订']);

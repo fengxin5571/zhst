@@ -57,6 +57,7 @@ class Order extends Eloquent
 	protected $fillable = [
 		'order_sn',
 		'order_type',
+        'reserve_type',
 		'userid',
 		'real_name',
 		'user_phone',
@@ -71,7 +72,8 @@ class Order extends Eloquent
 		'status',
 		'refund_price',
 		'mark',
-		'unique'
+		'unique',
+        'eat_people'
 	];
     //订单单号
     static function findAvailableNo()

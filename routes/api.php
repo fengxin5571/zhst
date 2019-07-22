@@ -64,6 +64,8 @@ $api->version('v1', [
             $api->get('confirm','OrderController@confirmOrder');
             //创建订单
             $api->post('add','OrderController@add');
+            //提交网订预定
+            $api->post('/reserve/add','OrderController@reserveAdd');
         });
 
         //智慧发现

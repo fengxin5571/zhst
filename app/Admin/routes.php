@@ -117,6 +117,10 @@ Route::group([
         $router->get('/','OrderController@index');
         //查看订单
         $router->get('/{id}','OrderController@show');
+        //网订预定订单
+        $router->get('/reserve/list','ReserveOrderController@index');
+        //删除网订订单
+        $router->delete('/reserve/list/{id}','ReserveOrderController@destroy');
     });
     //智慧发现
     $router->group(['prefix'=>'discover'],function ($router){

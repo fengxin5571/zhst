@@ -19,19 +19,20 @@ class AuthToken
     public function handle($request, Closure $next)
     {
         try{
-//            $client =new Client();
-//            $response=$client->request('GET','http://39.100.40.121:8080/api/user',[
-//                'headers'=>[
-//                    'Authorization'=>'Bearer '.$request->get('token')
-//                ]
-//            ]);
-//            $body = $response->getBody();
-//            $rest_json=json_decode($body->getContents(),true);
-//            //dd($rest_json);
-//            if(!$rest_json||$rest_json['code']==700){
-//                throw  new \Exception();
-//            }
-            $request->attributes->add(['user'=>['userId'=>'1124151110244003841','name'=>'xiaoy']]);
+            $client =new Client();
+            $response=$client->request('GET','http://39.100.40.121:8080/api/user',[
+                'headers'=>[
+                    'Authorization'=>'Bearer '.$request->input('token')
+                ]
+            ]);
+
+            $body = $response->getBody();
+            $rest_json=json_decode($body->getContents(),true);
+            if(!$rest_json||isset($rest_json['code'])&&$rest_json['code']==700){
+                throw  new \Exception();
+            }
+            //$request->attributes->add(['user'=>['userId'=>'1124151110244003841','name'=>'xiaoy']]);
+            $request->attributes->add(['user'=>$rest_json]);
             return $next($request);
         }catch (\Exception $e){
             return $this->response->error('用户token验证失败',401);
