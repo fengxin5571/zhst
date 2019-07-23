@@ -7,11 +7,13 @@
  */
 namespace App\Admin\Controllers;
 use App\Admin\Extensions\ReserveFoodToday;
+use App\Admin\Extensions\ResrveFoodRelpy;
 use App\Model\ReserveFoodCategory;
 use App\Model\ReserveFoodPool;
 use App\Model\ReserveFoodTag;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
+use Encore\Admin\Widgets\Table;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Illuminate\Http\Request;
@@ -64,7 +66,12 @@ class ReserveFoodPoolController extends AdminController{
             }, $tags);
             return join('&nbsp;', $tags);
         });
-        $grid->column('name','菜品名称')->editable();
+        $grid->column('name','菜品名称')->editable()->expand(function ($model) {
+            $comments = $model->comments()->take(10)->orderBy('created_at')->get()->map(function ($comment) {
+                return $comment->only(['id','reply_name','comment', 'created_at']);
+            });
+            return new Table(['ID', '评论人','评论内容', '发布时间'], $comments->toArray());
+        });;
         $grid->column('food_image','菜品封面')->lightbox(['width' => 50, 'height' => 50]);
         $grid->column('price','菜品价格')->display(function($price){
             return '￥'.$price;
@@ -94,13 +101,15 @@ class ReserveFoodPoolController extends AdminController{
                 1    => '已上架',
             ]);
         });
-
         $grid->tools(function ($tools) {
             $tools->batch(function ($batch) {
                 $batch->add('今日菜谱-无', new ReserveFoodToday(2));
                 $batch->add('今日菜谱-早餐', new ReserveFoodToday(0));
                 $batch->add('今日菜谱-午餐', new ReserveFoodToday(1));
             });
+        });
+        $grid->actions(function ($actions) {
+            $actions->append(new ResrveFoodRelpy($actions->getKey()));
         });
         return $grid;
     }

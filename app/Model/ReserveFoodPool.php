@@ -98,4 +98,8 @@ class ReserveFoodPool extends Eloquent
 	public function tags(){
         return $this->belongsToMany(ReserveFoodTag::class,'reservefood_tag_relation','r_food_id','r_tag_id');
     }
+    //菜品评论
+    public function comments(){
+        return $this->hasMany(ReserveFoodReply::class,'food_id','id');
+    }
 }

@@ -88,6 +88,11 @@ Route::group([
         //删除菜品
         $router->delete('/reservePool/{id}','ReserveFoodPoolController@destroy');
 
+        //网订菜品评论
+        $router->get('reservePool/comment','ReserveFoodReplyController@index');
+        //删除网订菜品评论
+        $router->delete('reservePool/comment/{id}','ReserveFoodReplyController@destroy');
+
         //网订菜谱
         $router->get('/reserveMenu','ReserveMenuController@index');
         //新增菜谱
