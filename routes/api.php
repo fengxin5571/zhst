@@ -45,6 +45,10 @@ $api->version('v1', [
             $api->get('todayFood','ReserveFoodController@today');
             //网订菜品点赞，取消
             $api->get('like','ReserveFoodController@like');
+            //网订菜品评论列表
+            $api->get('comment','ReserveFoodController@comment');
+            //网订菜品评论
+            $api->post('comment/add','ReserveFoodController@addComment');
         });
 
         //购物车

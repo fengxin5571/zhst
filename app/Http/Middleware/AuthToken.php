@@ -31,7 +31,7 @@ class AuthToken
 //            if(!$rest_json||isset($rest_json['code'])&&$rest_json['code']==700){
 //                throw  new \Exception();
 //            }
-            $request->attributes->add(['user'=>['userId'=>'1124151110244003841','name'=>'xiaoy']]);
+            $request->attributes->add(['user'=>['userId'=>'1124151110244003841','name'=>'xiaoy','avatar'=>'']]);
 //            $request->attributes->add(['user'=>$rest_json]);
             return $next($request);
         }catch (\Exception $e){

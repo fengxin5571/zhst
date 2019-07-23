@@ -9,6 +9,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Model\ReserveFoodCategory;
 use App\Model\ReserveFoodPool;
+use App\Model\ReserveFoodReply;
 use App\Model\ReserveFoodReplyRelation;
 use App\Model\ReserveMenu;
 use App\Model\ReserveType;
@@ -102,5 +103,45 @@ class ReserveFoodController extends Controller{
 
         }
         return $this->response->error('点赞失败',$this->forbidden_code);
+    }
+
+    /**
+     * 网订评论列表
+     * @param Request $request
+     * @return mixed
+     */
+    public function comment(Request $request){
+        $food_id=$request->input('food_id');
+        $foodInfo=ReserveFoodPool::find($food_id);
+        if(!$food_id||!$foodInfo){
+            return $this->response->error('菜品id为空或菜品不存在',$this->forbidden_code);
+        }
+        $data['comment_list']=$foodInfo->comments()->orderBy('created_at','desc')->get(['id','food_id','avatar','reply_name','comment','created_at']);
+        return $this->successResponse($data);
+    }
+    public function addComment(Request $request){
+        $message=[
+            'food_id.required'=>'网订菜品id不能为空',
+            'comment.required'=>'评论内容不能为空',
+            'food_id.numeric' =>'网订菜品id必须是数字'
+        ];
+        $validator=Validator::make($request->all(),[
+            'food_id'=>'required|numeric',
+            'comment'=>'required'
+        ],$message);
+        if($validator->fails()){
+            return $this->response->error($validator->errors()->first(),$this->forbidden_code);
+        }
+        $insert_array=[
+            'food_id'=>$request->input('food_id'),
+            'comment'=>$request->input('comment'),
+            'avatar' =>$this->user['avatar'],
+            'userid' =>$this->user['userId'],
+            'reply_name'=>$this->user['name']
+        ];
+        if(!ReserveFoodReply::create($insert_array)){
+            return $this->response->error('评论失败',$this->forbidden_code);
+        }
+        return $this->successResponse('','评论成功');
     }
 }
