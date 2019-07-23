@@ -52,7 +52,7 @@ class ReserveFoodController extends Controller{
         }
         //获取当天星期几
         $week=date('w');
-        $fields=['id','cid','name','food_type','description','food_image','ot_price','point','price','sellCount','likeCount'];
+        $fields=['id','cid','name','food_type','description','food_image','point','sellCount','likeCount'];
         $week_food_ids=ReserveMenu::where('reserve_type',$request->input('type_id'))->whereRaw("find_in_set('".$week."',weekly)")->pluck('food_id');
         $data['food_list']=ReserveFoodCategory::get(['id','cat_name']);
         $data['food_list']->each(function($item,$key)use ($week_food_ids,$fields){
@@ -69,7 +69,7 @@ class ReserveFoodController extends Controller{
     public function today(Request $request){
         $today_type=$request->input('type',0);
         $data['food_list']=ReserveFoodPool::where('is_today',$today_type)->isShow()->get([
-            'id','cid','name','description','cook','food_image','price','ot_price','point','likeCount'
+            'id','cid','name','description','cook','food_image','point','likeCount'
             ]);
         $data['food_list']->each(function($item,$key){
             $item->is_like=ReserveFoodReplyRelation::where(['userid'=>$this->user['userId'],'r_food_id'=>$item->id])->count()>0?true:false;

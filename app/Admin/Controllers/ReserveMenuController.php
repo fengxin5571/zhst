@@ -69,7 +69,7 @@ class ReserveMenuController extends AdminController{
                           <img style="width: 30px;height: 30px;margin:0;cursor: pointer;" src="{$food['food_image']}" class="img img-thumbnail"> 
                      </span> 
                      <span>{$food['name']}</span> 
-                     <span> | ￥{$food['price']}</span>
+                 
                  </p>   
              </div>   
 EOT;

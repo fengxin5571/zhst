@@ -38,8 +38,6 @@ class ReserveFoodPool extends Eloquent
     protected static $pid=0;
 	protected $casts = [
 		'cid' => 'int',
-		'price' => 'float(10,2)',
-		'ot_price' => 'float(10,2)',
 		'point' => 'int',
 		'sellCount' => 'int',
 		'likeCount' => 'int',
@@ -55,8 +53,6 @@ class ReserveFoodPool extends Eloquent
 		'name',
 		'description',
 		'food_image',
-		'price',
-		'ot_price',
 		'point',
 		'sellCount',
 		'likeCount',
