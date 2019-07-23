@@ -109,7 +109,9 @@ class ReserveFoodPoolController extends AdminController{
             });
         });
         $grid->actions(function ($actions) {
+
             $actions->append(new ResrveFoodRelpy($actions->getKey()));
+            $actions->disableView();
         });
         return $grid;
     }
