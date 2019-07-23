@@ -67,7 +67,7 @@ class ReserveFoodPoolController extends AdminController{
             return join('&nbsp;', $tags);
         });
         $grid->column('name','菜品名称')->editable()->expand(function ($model) {
-            $comments = $model->comments()->take(10)->orderBy('created_at')->get()->map(function ($comment) {
+            $comments = $model->comments()->take(10)->orderBy('created_at','desc')->get()->map(function ($comment) {
                 return $comment->only(['id','reply_name','comment', 'created_at']);
             });
             return new Table(['ID', '评论人','评论内容', '发布时间'], $comments->toArray());
