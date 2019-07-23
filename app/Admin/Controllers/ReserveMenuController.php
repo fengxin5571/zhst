@@ -96,7 +96,7 @@ EOT;
     protected function form(){
         $form=new Form(new ReserveMenu());
         $form->select('reserve_type','网订类型')->options(ReserveType::all()->pluck('reserve_type_name','id'))->required();
-        $form->multipleSelect('food_id','菜品')->options(ReserveFoodPool::where('is_show',1)->pluck('name','id'))->required();
+        $form->multipleSelect('food_id','菜品')->options(ReserveFoodPool::where('is_show',1)->pluck('name','id'))->required()->help('可多选菜品');
         $form->checkbox('weekly','星期排期')->options($this->weeklyList);
         $form->saving(function (Form $form){
             $message=['title'=> '错误'];
