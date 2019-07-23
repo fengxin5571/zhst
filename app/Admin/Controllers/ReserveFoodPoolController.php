@@ -10,6 +10,7 @@ use App\Admin\Extensions\ReserveFoodToday;
 use App\Admin\Extensions\ResrveFoodRelpy;
 use App\Model\ReserveFoodCategory;
 use App\Model\ReserveFoodPool;
+use App\Model\ReserveFoodReply;
 use App\Model\ReserveFoodTag;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
@@ -66,12 +67,7 @@ class ReserveFoodPoolController extends AdminController{
             }, $tags);
             return join('&nbsp;', $tags);
         });
-        $grid->column('name','菜品名称')->editable()->expand(function ($model) {
-            $comments = $model->comments()->take(10)->orderBy('created_at','desc')->get()->map(function ($comment) {
-                return $comment->only(['id','reply_name','comment', 'created_at']);
-            });
-            return new Table(['ID', '评论人','评论内容', '发布时间'], $comments->toArray());
-        });;
+        $grid->column('name','菜品名称')->editable();
         $grid->column('food_image','菜品封面')->lightbox(['width' => 50, 'height' => 50]);
         $grid->column('price','菜品价格')->display(function($price){
             return '￥'.$price;
@@ -86,6 +82,14 @@ class ReserveFoodPoolController extends AdminController{
         $grid->column('is_show','状态')->using(['0'=>'<span class=\'label label-danger\'>未上架</span>','1'=>'<span class=\'label label-success\'>已上架</span>']);
         $grid->column('is_today','今日菜谱')->using($this->today);
         $grid->column('likeCount','点赞数')->sortable();
+        $grid->column('评论数')->display(function(){
+            return ReserveFoodReply::where('food_id',$this->id)->count();
+        })->expand(function ($model) {
+            $comments = $model->comments()->take(10)->orderBy('created_at','desc')->get()->map(function ($comment) {
+                return $comment->only(['id','reply_name','comment', 'created_at']);
+            });
+            return new Table(['ID', '评论人','评论内容', '发布时间'], $comments->toArray());
+        });
         $grid->column('created_at','添加时间')->sortable();
         $grid->filter(function($filter){
             $filter->equal('cid','菜品分类')->select(ReserveFoodCategory::pluck('cat_name','id'));
