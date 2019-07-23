@@ -120,7 +120,7 @@ class ReserveFoodPoolController extends AdminController{
         $categroyList=ReserveFoodCategory::pluck('cat_name','id')->toArray();
         $form=new Form(new ReserveFoodPool);
         $form->divider('今日菜谱');
-        $form->radio('is_today','所属类型')->options($this->today);
+        $form->radio('is_today','所属类型')->options($this->today)->default(2);
         $form->divider('基本信息');
         $form->select('cid','菜品分类')->options($categroyList)->required();
         $form->text('name','菜品名称')->required();
