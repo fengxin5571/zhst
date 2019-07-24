@@ -18,7 +18,7 @@ use Encore\Admin\Widgets\Table;
 class OrderController extends AdminController
 {
 
-
+    protected $pay_type=['weixin' => '微信支付', 'allipay' => '支付宝', 'card' => '一卡通'];
     /**
      * 订单列表
      * @param Content $content
@@ -43,9 +43,22 @@ class OrderController extends AdminController
         return $content->header('订单详情')
             ->description('详细')
             ->breadcrumb(['text' => '订单详情'])
-            ->body(Admin::show($info,function($show){
+            ->row(Admin::show($info,function($show){
+                $show->panel()
+                    ->title('配送信息');
+                $show->real_name('订餐人：');
+                $show->user_phone('订餐人电话：');
+                $show->user_address('送餐地址：');
+            }))
+            ->row(Admin::show($info,function ($show){
+                $show->panel()
+                    ->title('订单信息')
+                    ->tools(function ($tools) {
+                        $tools->disableEdit();
+                        $tools->disableList();
+                        $tools->disableDelete();
+                    });
                 $show->order_sn('订单号：');
-                $show->order_type('订单类型：')->using(['1'=>'外卖','2'=>'网订']);
                 $show->orderFoods('订单菜品')->unescape()->as(function ($orderFoods){
                     $html='';
                     foreach ($orderFoods as $food){
@@ -64,15 +77,25 @@ EOT;
                     return $html;
                 });
                 $show->total_num('菜品总数：');
-                $show->real_name('订餐人：');
-                $show->user_phone('订餐人电话：');
                 $show->box_charges('餐盒费：')->as(function ($box_charges){
                     return '￥'.$box_charges;
                 });
                 $show->total_price('订单总价：')->as(function ($total_price){
                     return '￥'.$total_price;
                 });
-
+                $pay_types=$this->pay_type;
+                $show->pay_type('支付方式：')->as(function ($pay_type)use($pay_types){
+                       return $pay_types[$pay_type];
+                });
+                $show->status('订单状态：')->as(function($status){
+                    if($this->paid==0&&$this->status==0){
+                        $status_name='未支付';
+                    }elseif ($this->paid==1&&$this->status==0&&$this->refund_status==0){
+                        $status_name='待发出';
+                    }
+                    return $status_name;
+                });
+                $show->created_at('添加时间：');
             }));
     }
     protected function grid()
@@ -114,7 +137,7 @@ EOT;
         $grid->column('box_charges','餐盒费');
         $grid->column('total_price', '订单总价')->style('text-align: center;');
         $grid->column('paid', '支付状态')->using(['0' => '未支付', '1' => '已支付']);
-        $grid->column('pay_type', '支付方式')->using(['weixin' => '微信支付', 'allipay' => '支付宝', 'card' => '一卡通']);
+        $grid->column('pay_type', '支付方式')->using($this->pay_type);
         $grid->column('订单状态')->display(function(){
             return self::get_order_status($this);
         });
@@ -125,11 +148,7 @@ EOT;
                 $filter->equal('order_type','订单类型')->select([''=>'所有','1'=>'外卖']);
                 $filter->equal('real_name','订餐人')->placeholder('请输入订餐人姓名查询');
                 $filter->equal('user_phone','电话')->placeholder('请输入订餐人电话查询');
-                $filter->equal('pay_type','支付方式')->radio([
-                    'weixin'   => ' 微信',
-                    'allipay'  => ' 支付宝',
-                    'card'     => ' 一卡通',
-                ]);
+                $filter->equal('pay_type','支付方式')->radio($this->pay_type);
             });
             $filter->column(1/2, function ($filter) {
                 $filter->like('order_sn','订单号')->placeholder('请输入订单号查询');
