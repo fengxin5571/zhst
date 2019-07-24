@@ -89,7 +89,7 @@ class TakeOutFoolController extends AdminController{
         $form->select('cid','菜品分类')->options($categroyList)->required();
         $form->text('name','菜品名称')->rules('required');
         $form->textarea('description','菜品简介')->rows(5);
-        $form->image('food_image','菜品封面')->rules('required|mimes:jpeg,bmp,png')->required();
+        $form->image('food_image','菜品封面')->rules('required|mimes:jpeg,bmp,png')->uniqueName()->required();
         $form->currency('ot_price','原价价格')->symbol('￥')->required();
         $form->currency('price','菜品价格')->symbol('￥')->required();
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
@@ -106,6 +106,16 @@ class TakeOutFoolController extends AdminController{
                 ];
                 $error=new MessageBag($message);
                 return back()->with(compact('error'));
+            }
+            if(request()->file('food_image')){
+                if(request()->file('food_image')->getSize()>="819200"){
+                    $message=[
+                        'title'=>'错误',
+                        'message'=>'菜品封面大小不能超过800K'
+                    ];
+                    $error=new MessageBag($message);
+                    return back()->with(compact('error'));
+                }
             }
         });
         return $form;

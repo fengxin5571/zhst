@@ -125,7 +125,7 @@ class ReserveFoodPoolController extends AdminController{
         $form->select('cid','菜品分类')->options($categroyList)->required();
         $form->text('name','菜品名称')->required();
         $form->textarea('description','菜品简介')->rows(5);
-        $form->image('food_image','菜品封面')->rules('required|mimes:jpeg,bmp,png')->required();
+        $form->image('food_image','菜品封面')->rules('required|mimes:jpeg,bmp,png')->uniqueName()->required();
         $form->text('cook','厨师');
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
         $form->divider('规格参数');
@@ -133,7 +133,18 @@ class ReserveFoodPoolController extends AdminController{
         $form->number('calorie','卡路里(100K)')->min(0)->default(0);
         $form->multipleSelect('tags','菜品标签')->options(ReserveFoodTag::all()->pluck('r_tag_name','id'));
 
-//        $form->saving(function(Form $form){
+        $form->saving(function(Form $form){
+            if(request()->file('food_image')){
+                if(request()->file('food_image')->getSize()>="819200"){
+                    $message=[
+                        'title'=>'错误',
+                        'message'=>'菜品封面大小不能超过800K'
+                    ];
+                    $error=new MessageBag($message);
+                    return back()->with(compact('error'));
+                }
+            }
+
 //            if(!$form->_editable){
 //                if(empty((float)$form->price)){
 //                    $message=[
@@ -144,8 +155,8 @@ class ReserveFoodPoolController extends AdminController{
 //                    return back()->with(compact('error'));
 //                }
 //            }
-//
-//        });
+
+        });
         return $form;
     }
     public function today(Request $request){
