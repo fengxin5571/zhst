@@ -22,7 +22,7 @@ class TakeOutFoodController extends Controller{
         $fields=['id','name','description','food_image','price','likeCount'];
         $recommendFood['food_count']=TakeFoodPool::isShow()->isRecommend()->count();
         $recommendFood['food_list']=TakeFoodPool::isShow()->isRecommend()
-            ->forPage($request->get('page',1),$request->get('limit',Controller::LIMIT))->get($fields);
+            ->forPage($request->get('page',1),$request->get('limit',Controller::LIMIT))->orderBy('likeCount','desc')->get($fields);
         $recommendFood['food_list']->each(function($item,$key){
             $item->is_like=TakeFoodReplyRelation::where(['userid'=>$this->user['userId'],'t_food_id'=>$item->id])->count()?true:false;
         });

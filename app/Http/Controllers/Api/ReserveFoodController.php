@@ -68,7 +68,7 @@ class ReserveFoodController extends Controller{
      */
     public function today(Request $request){
         $today_type=$request->input('type',0);
-        $data['food_list']=ReserveFoodPool::where('is_today',$today_type)->isShow()->get([
+        $data['food_list']=ReserveFoodPool::where('is_today',$today_type)->isShow()->orderBy('likeCount','desc')->get([
             'id','cid','name','description','cook','food_image','point','likeCount'
             ]);
         $data['food_list']->each(function($item,$key){

@@ -50,7 +50,6 @@ class Order extends Eloquent
 	];
 
 	protected $dates = [
-		'eat_time',
 		'get_time',
 		'pay_time'
 	];
