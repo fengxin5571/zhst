@@ -72,6 +72,7 @@ class Order extends Eloquent
 		'pay_type',
 		'status',
 		'refund_price',
+        'refund_status',
 		'mark',
 		'unique',
         'eat_people',

@@ -31,9 +31,8 @@ class ReserveOrderController extends AdminController{
         $grid=new Grid(new Order());
         $grid->model()->where('order_type',2);
         $grid->column('id','ID')->sortable();
-        $grid->column('order_type','订单类型')->using(['1'=>'外卖','2'=>'网订']);
-        $grid->column('reserve_type','网订类型')->using(ReserveType::pluck('reserve_type_name','id')->toArray());
         $grid->column('order_sn', '预定单号')->copyable();
+        $grid->column('reserve_type','网订类型')->using(ReserveType::pluck('reserve_type_name','id')->toArray());
         $grid->column('real_name', '订餐人');
         $grid->column('user_phone', '订餐人电话');
         $grid->column('eat_people','就餐人数');

@@ -17,10 +17,7 @@ use Encore\Admin\Widgets\Table;
 
 class OrderController extends AdminController
 {
-    protected static $status = [
-        '1' => ['-1' => '申请退款', '0' => '待发出', '1' => '待取餐', '2' => '已取餐', '3' => '待评价', '-2' => '已退款'],
-        '2' => ['0'=>'待确认'],
-    ];
+
 
     /**
      * 订单列表
@@ -82,9 +79,7 @@ EOT;
     {
         $grid = new Grid(new Order());
         $grid->model()->where('order_type',1);
-        //$grid->column('id', "ID");
         $grid->column('order_sn', '订单号')->copyable();
-        $grid->column('order_type', '类型')->using(['1'=>'外卖','2'=>'网订']);
         $grid->orderFoods('菜品信息')->display(function ($orderFoods) {
             $orderFoods = array_map(function ($food) {
                 return <<<EOT
@@ -103,14 +98,25 @@ EOT;
             return join('&nbsp;', $orderFoods);
         });
         $grid->column('total_num', '菜品总数')->style('text-align: center;');
-        $grid->column('real_name', '订餐人');
-        $grid->column('user_phone', '订餐人电话');
+        $grid->column('订餐人信息')->display(function(){
+            return <<<EOT
+             <div class="layui-table-cell laytable-cell-1-0-2">   
+                 <p> 
+                     姓名：<span class="label label-primary">{$this->real_name} </span> 
+                 </p>   
+                 <p> 
+                     电话：<span class="label label-primary">{$this->user_phone}</span>
+                 </p>   
+             </div>   
+EOT;
+
+        });
         $grid->column('box_charges','餐盒费');
         $grid->column('total_price', '订单总价')->style('text-align: center;');
         $grid->column('paid', '支付状态')->using(['0' => '未支付', '1' => '已支付']);
         $grid->column('pay_type', '支付方式')->using(['weixin' => '微信支付', 'allipay' => '支付宝', 'card' => '一卡通']);
         $grid->column('订单状态')->display(function(){
-            return $this->order_type==1?self::$status[1][$this->status]:self::$status[2][$this->status];
+            return self::get_order_status($this);
         });
         $grid->column('created_at', '订单时间')->sortable();
 
@@ -142,5 +148,19 @@ EOT;
         });
         $grid->disableCreateButton();
         return $grid;
+    }
+
+    /**
+     * 获取订单状态
+     * @param $order
+     * @return string
+     */
+    protected static function get_order_status($order){
+        if($order->paid==0&&$order->status==0){
+            $status_name='未支付';
+        }elseif ($order->paid==1&&$order->status==0&&$order->refund_status==0){
+            $status_name='待发出';
+        }
+        return $status_name;
     }
 }
