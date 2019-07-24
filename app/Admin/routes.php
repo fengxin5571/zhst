@@ -140,5 +140,6 @@ Route::group([
         //删除发现
         $router->delete('/{id}','DiscoverController@destroy');
     });
-
+    //系统设置
+    $router->get('settings','FormController@setting');
 });
