@@ -43,6 +43,7 @@ class Order extends Eloquent
 		'order_type' => 'int',
 		'total_num' => 'int',
 		'total_price' => 'float(10,2)',
+        'box_charges' =>'float(10,2)',
 		'paid' => 'int',
 		'status' => 'int',
 		'refund_price' => 'float(10,2)'
@@ -73,7 +74,8 @@ class Order extends Eloquent
 		'refund_price',
 		'mark',
 		'unique',
-        'eat_people'
+        'eat_people',
+        'box_charges'
 	];
     //订单单号
     static function findAvailableNo()

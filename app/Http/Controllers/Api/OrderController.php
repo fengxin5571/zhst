@@ -89,7 +89,8 @@ class OrderController extends Controller{
         });
         $cart_list['order_type']=$request->input('order_type');
         $cart_list['cart_count']=Cart::where(['userid'=>$this->user['userId']])->whereIn('id',$carts_id)->sum('cart_num');
-        $cart_list['price_count']=number_format($price_count,2);
+        $cart_list['box_charges']=bcmul($cart_list['cart_count'],config('boxCharges'),2);
+        $cart_list['price_count']=bcadd($price_count,$cart_list['box_charges'],2);
 //        $userid=$this->user['userId'];
         //Cache::put('user_order_'.$this->user['userId'],compact('carts_id','userid'),10);
         return $this->successResponse($cart_list);

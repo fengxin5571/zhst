@@ -69,6 +69,9 @@ EOT;
                 $show->total_num('菜品总数：');
                 $show->real_name('订餐人：');
                 $show->user_phone('订餐人电话：');
+                $show->box_charges('餐盒费：')->as(function ($box_charges){
+                    return '￥'.$box_charges;
+                });
                 $show->total_price('订单总价：')->as(function ($total_price){
                     return '￥'.$total_price;
                 });
@@ -79,7 +82,7 @@ EOT;
     {
         $grid = new Grid(new Order());
         $grid->model()->where('order_type',1);
-        $grid->column('id', "ID");
+        //$grid->column('id', "ID");
         $grid->column('order_sn', '订单号')->copyable();
         $grid->column('order_type', '类型')->using(['1'=>'外卖','2'=>'网订']);
         $grid->orderFoods('菜品信息')->display(function ($orderFoods) {
@@ -102,6 +105,7 @@ EOT;
         $grid->column('total_num', '菜品总数')->style('text-align: center;');
         $grid->column('real_name', '订餐人');
         $grid->column('user_phone', '订餐人电话');
+        $grid->column('box_charges','餐盒费');
         $grid->column('total_price', '订单总价')->style('text-align: center;');
         $grid->column('paid', '支付状态')->using(['0' => '未支付', '1' => '已支付']);
         $grid->column('pay_type', '支付方式')->using(['weixin' => '微信支付', 'allipay' => '支付宝', 'card' => '一卡通']);

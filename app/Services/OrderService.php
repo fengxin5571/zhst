@@ -83,8 +83,14 @@ class OrderService{
                 );
                 $orderFood=OrderFood::create($param);
             }
+            //餐盒费
+            $box_charges=bcmul(config('boxCharges'),$totalNum,2);
             //更新订单总价与菜品总量
-            $order->update(['total_price'=>number_format($totalAmount,2),'total_num'=>$totalNum]);
+            $order->update([
+                'total_price'=>bcadd($totalAmount,$box_charges,2),
+                'total_num'=>$totalNum,
+                'box_charges'=>$box_charges
+            ]);
             Cart::whereIn('id',$carts_id)->where('userid',$user['userId'])->delete();
             return $order;
         });
