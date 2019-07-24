@@ -89,7 +89,7 @@ class TakeOutFoolController extends AdminController{
         $form->select('cid','菜品分类')->options($categroyList)->required();
         $form->text('name','菜品名称')->rules('required');
         $form->textarea('description','菜品简介')->rows(5);
-        $form->image('food_image','菜品封面')->rules('required|mimes:jpeg,bmp,png')->uniqueName()->required();
+        $form->image('food_image','菜品封面')->rules('required|mimes:jpeg,bmp,png')->uniqueName()->required()->help('上传图片不得大于800K');
         $form->currency('ot_price','原价价格')->symbol('￥')->required();
         $form->currency('price','菜品价格')->symbol('￥')->required();
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
