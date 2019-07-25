@@ -9,6 +9,7 @@
 namespace App\Admin\Controllers;
 
 use App\Model\Order;
+use App\Services\Common;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Grid;
@@ -139,7 +140,7 @@ EOT;
         $grid->column('paid', '支付状态')->using(['0' => '未支付', '1' => '已支付']);
         $grid->column('pay_type', '支付方式')->using($this->pay_type);
         $grid->column('订单状态')->display(function(){
-            return self::get_order_status($this);
+            return Common::get_order_status($this);
         });
         $grid->column('created_at', '订单时间')->sortable();
 
@@ -167,19 +168,5 @@ EOT;
         });
         $grid->disableCreateButton();
         return $grid;
-    }
-
-    /**
-     * 获取订单状态
-     * @param $order
-     * @return string
-     */
-    protected static function get_order_status($order){
-        if($order->paid==0&&$order->status==0){
-            $status_name='未支付';
-        }elseif ($order->paid==1&&$order->status==0&&$order->refund_status==0){
-            $status_name='待发出';
-        }
-        return $status_name;
     }
 }

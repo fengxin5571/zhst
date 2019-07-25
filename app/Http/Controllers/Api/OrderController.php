@@ -12,6 +12,8 @@ use App\Model\Order;
 use App\Model\ReserveOrder;
 use App\Model\ReserveType;
 use App\Model\TakeFoodPool;
+use App\Services\Common;
+use function App\Services\get_order_status;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -217,5 +219,23 @@ class OrderController extends Controller{
         }
         $order->reserve_name=ReserveType::where('id',$order->reserve_type)->value('reserve_type_name');
         return $this->successResponse($order);
+    }
+
+    /**
+     * 我的订单
+     * @param Request $request
+     * @return mixed
+     */
+    public function myOrder(Request $request){
+        $order_type=$request->input('order_type',1);
+        $fields=['id','order_sn','order_type','unique','created_at','reserve_type','paid','refund_status','status'];
+        $data['order_list']=Order::where(['order_type'=>$order_type,'userid'=>$this->user['userId']])->with(['orderFoods'=>function($query){
+            $query->select('id','order_unique','food_name','food_price','food_image','food_num');
+        }])->get($fields);
+        $data['order_list']->each(function ($item,$key)use($order_type){
+            $item->status_name=$order_type==1?Common::get_order_status($item):'';
+            $item->reserve_info=ReserveType::where('id',$item->reserve_type)->get(['reserve_type_image','reserve_type_name']);
+        });
+        return $this->successResponse($data);
     }
 }
