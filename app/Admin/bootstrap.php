@@ -33,6 +33,7 @@ app('view')->prependNamespace('admin', resource_path('views/admin'));
 });
 //表格初始化
 Encore\Admin\Grid::init(function (Encore\Admin\Grid $grid){
+    $grid->enableHotKeys();
     $grid->filter(function($filter){
         // 去掉默认的id过滤器
         $filter->disableIdFilter();
