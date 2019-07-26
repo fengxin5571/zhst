@@ -23,10 +23,12 @@ class HomeController extends AdminController
                 $row->column(3, function (Column $column) {
                     $column->append(Dashboard::todayOrder(2,'green'));
                 });
-
                 $row->column(3, function (Column $column) {
-                   // $column->append(Dashboard::dependencies());
+                    $column->append(Dashboard::foods());
                 });
+               $row->column(3, function (Column $column) {
+                   $column->append(Dashboard::foods(2,'blue'));
+               });
             })
             ->row(Dashboard::environment());
     }
