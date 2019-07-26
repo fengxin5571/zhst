@@ -238,4 +238,22 @@ class OrderController extends Controller{
         });
         return $this->successResponse($data);
     }
+
+    /**
+     * 订单详情
+     * @param Request $request
+     * @return mixed
+     */
+    public function orderDetails(Request $request){
+        $order_id=$request->input('order_id');
+        $orderInfo=Order::with(['orderFoods'=>function($query){
+            $query->select('id','order_unique','food_name','food_price','food_image','food_num');
+        }])->find($order_id);
+        if(!$order_id||!$orderInfo){
+            return $this->response->error('订单获取失败，id为空或订单不存在',$this->forbidden_code);
+        }
+        $orderInfo->status_name=$orderInfo->order_type==1?Common::get_order_status($orderInfo):'';
+        $orderInfo->reserve_info=ReserveType::where('id',$orderInfo->reserve_type)->get(['reserve_type_name']);
+        return $this->successResponse($orderInfo);
+    }
 }

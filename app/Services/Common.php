@@ -7,6 +7,11 @@
  */
 namespace App\Services;
 class Common{
+    /**
+     * 获取订单状态
+     * @param $order
+     * @return string
+     */
     public static function get_order_status($order){
         if($order->paid==0&&$order->status==0){
             $status_name='未支付';
