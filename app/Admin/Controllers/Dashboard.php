@@ -118,11 +118,11 @@ class Dashboard
     }
     public static function todayOrder($order_type=1,$style='aqua'){
         if($order_type==1){
-            $order_count=Order::whereBetween('created_at',[date('Y-m-d 00:00:00', time()),date('Y-m-d 23:59:59', time())])
+            $order_count=Order::whereBetween('created_at',[date('Y-m-d 00:00:00'),date('Y-m-d 23:59:59')])
                 ->where('order_type',1)->count();
             $order=new InfoBox('今日外卖订单', 'reorder', $style, '/admin/order',$order_count);
         }else{
-            $order_count=Order::whereBetween('created_at',[date('Y-m-d 00:00:00', time()),date('Y-m-d 23:59:59', time())])
+            $order_count=Order::whereBetween('created_at',[date('Y-m-d 00:00:00'),date('Y-m-d 23:59:59')])
                 ->where('order_type',2)->count();
             $order=new InfoBox('今日网订订单', 'reorder', $style, '/admin/order/reserve/list',$order_count);
         }
