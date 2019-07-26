@@ -50,6 +50,7 @@ class OrderController extends AdminController
                 $show->real_name('订餐人：');
                 $show->user_phone('订餐人电话：');
                 $show->user_address('送餐地址：');
+                $show->get_time('送餐时间：');
             }))
             ->row(Admin::show($info,function ($show){
                 $show->panel()
