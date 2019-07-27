@@ -136,7 +136,7 @@ class CartController extends Controller{
     {
         $type=$request->input('type',1);
         $this->cartService->remove($type,$this->user);
-        return $this->successResponse('','成功');
+        return $this->successResponse([],'成功');
 
     }
 }
