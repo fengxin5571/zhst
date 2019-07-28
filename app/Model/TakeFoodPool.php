@@ -40,6 +40,7 @@ class TakeFoodPool extends Eloquent
 		'mer_id' => 'int',
         'weight' =>'float(10,2)',
         'ot_price' =>'float(10,2)',
+        'box_charge'=>'float(10,2)',
         'price'    =>'float(10,2)'
 	];
 
@@ -58,6 +59,7 @@ class TakeFoodPool extends Eloquent
         'weight',
         'calorie',
         'ot_price',
+        'box_charge',
         'is_recommend',
         'is_today'
 	];

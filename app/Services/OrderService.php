@@ -55,6 +55,7 @@ class OrderService{
             $order->save();
             $totalAmount = 0;
             $totalNum=0;
+            $box_charges=0;
             $carts_id=explode(',',$orderinfo['carts_id']);
             foreach($carts_id as $cart_id){
                 $cart=Cart::find($cart_id);
@@ -67,11 +68,14 @@ class OrderService{
                 if($orderinfo['order_type']==1){
                     if($cart->food_type==1){//如果是普通菜品
                         $food=TakeFoodPool::where('id',$cart->food_id)->first();
+                        //餐盒费
+                        $box_charges=bcadd($box_charges,bcmul($food->box_charge,$cart->cart_num,2),2);
                     }
                 }else{//如果是网订
 
                 }
-                $totalAmount += bcmul($food->price,$cart->cart_num,2);
+                //订单总价
+                $totalAmount =bcadd($totalAmount,bcmul($food->price,$cart->cart_num,2),2);
                 $totalNum +=$cart->cart_num;
                 $param= array(
                     'order_unique'=>$order->unique,
@@ -83,8 +87,6 @@ class OrderService{
                 );
                 $orderFood=OrderFood::create($param);
             }
-            //餐盒费
-            $box_charges=bcmul(config('boxCharges'),$totalNum,2);
             //更新订单总价与菜品总量
             $order->update([
                 'total_price'=>bcadd($totalAmount,$box_charges,2),

@@ -95,6 +95,7 @@ class TakeOutFoolController extends AdminController{
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
         $form->radio('is_recommend','特别推荐')->options(['0'=>'否','1'=>'是'])->default(0);
         $form->divider('规格参数');
+        $form->currency('box_charge','餐盒费')->symbol('￥');
         $form->number('weight','菜品重量(单位：K)')->min(1)->default(1);
         $form->number('calorie','卡路里(100K)')->min(0)->default(0);
         $form->multipleSelect('tags','菜品标签')->options(TakeFoodTag::all()->pluck('t_tag_name','id'));

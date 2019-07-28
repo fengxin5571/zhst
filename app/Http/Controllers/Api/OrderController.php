@@ -72,16 +72,18 @@ class OrderController extends Controller{
             return $this->response->error($validator->errors()->first(),$this->forbidden_code);
         }
         $carts_id=explode(',',$request->input('carts_id'));
-        $price_count=0;
+        $price_count=0;$box_charges=0;
         $cart_list['cart_list']=Cart::where(['userid'=>$this->user['userId']])->whereIn('id',$carts_id)->get(['id','type','food_id','food_type','cart_num','created_at']);
-        $cart_list['cart_list']->each(function($item,$key)use(&$price_count){
+        $cart_list['cart_list']->each(function($item,$key)use(&$price_count,&$box_charges){
             if($item->type==1){//如果是外卖菜品
                 if($item->food_type==1){//如果是普通菜品
-                    $takeFood=TakeFoodPool::where('id',$item->food_id)->first(['id','name','food_image','price']);
+                    $takeFood=TakeFoodPool::where('id',$item->food_id)->first(['id','name','food_image','price','box_charge']);
                     //获取菜品信息
                     $item->food_info=$takeFood;
                     //计算订单价格
-                    $price_count+=bcmul($takeFood->price,$item->cart_num,2);
+                    $price_count=bcadd($price_count,bcmul($takeFood->price,$item->cart_num,2),2);
+                    //计算订单餐盒费
+                    $box_charges=bcadd($box_charges,bcmul($takeFood->box_charge,$item->cart_num,2),2);
                 }else{
 
                 }
@@ -91,7 +93,7 @@ class OrderController extends Controller{
         });
         $cart_list['order_type']=$request->input('order_type');
         $cart_list['cart_count']=Cart::where(['userid'=>$this->user['userId']])->whereIn('id',$carts_id)->sum('cart_num');
-        $cart_list['box_charges']=bcmul($cart_list['cart_count'],config('boxCharges'),2);
+        $cart_list['box_charges']=$box_charges;
         $cart_list['price_count']=bcadd($price_count,$cart_list['box_charges'],2);
 //        $userid=$this->user['userId'];
         //Cache::put('user_order_'.$this->user['userId'],compact('carts_id','userid'),10);
