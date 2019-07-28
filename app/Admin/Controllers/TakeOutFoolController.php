@@ -61,6 +61,9 @@ class TakeOutFoolController extends AdminController{
         $grid->column('price','菜品价格')->display(function($price){
             return '￥'.$price;
         })->sortable();
+        $grid->column('box_charge','餐盒费')->display(function($box_charge){
+            return '￥'.$box_charge;
+        })->sortable();
         $grid->column('is_show','状态')->using(['0'=>'<span class=\'label label-danger\'>未上架</span>','1'=>'<span class=\'label label-success\'>已上架</span>']);
         $grid->column('sellCount','销量')->sortable();
         $grid->column('likeCount','点赞数')->sortable();
