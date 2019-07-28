@@ -56,7 +56,7 @@ class OrderService{
             $totalAmount = 0;
             $totalNum=0;
             $box_charges=0;
-            $carts_id=explode(',',$orderinfo['carts_id']);
+            $carts_id=array_unique(explode(',',$orderinfo['carts_id']));
             foreach($carts_id as $cart_id){
                 $cart=Cart::find($cart_id);
                 if(!$cart){
