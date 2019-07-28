@@ -255,7 +255,7 @@ class OrderController extends Controller{
             return $this->response->error('订单获取失败，id为空或订单不存在',$this->forbidden_code);
         }
         $orderInfo->status_name=$orderInfo->order_type==1?Common::get_order_status($orderInfo):'';
-        $orderInfo->reserve_info=ReserveType::where('id',$orderInfo->reserve_type)->get(['reserve_type_name']);
+        $orderInfo->reserve_info=ReserveType::where('id',$orderInfo->reserve_type)->first(['reserve_type_name']);
         return $this->successResponse($orderInfo);
     }
 }

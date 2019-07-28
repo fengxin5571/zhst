@@ -16,7 +16,7 @@
         }
     })
     .then(function (response) {
-        console.log(response.data.data.order_list[0].reserve_info[0].reserve_type_image);
+        console.log(response.data.data.order_list[0].reserve_info.reserve_type_image);
         // for(response.data)
     })
     .catch(function (error) {
