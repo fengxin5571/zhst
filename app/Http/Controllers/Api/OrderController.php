@@ -236,7 +236,7 @@ class OrderController extends Controller{
         }])->get($fields);
         $data['order_list']->each(function ($item,$key)use($order_type){
             $item->status_name=$order_type==1?Common::get_order_status($item):'';
-            $item->reserve_info=ReserveType::where('id',$item->reserve_type)->get(['reserve_type_image','reserve_type_name']);
+            $item->reserve_info=ReserveType::where('id',$item->reserve_type)->first(['reserve_type_image','reserve_type_name']);
         });
         return $this->successResponse($data);
     }

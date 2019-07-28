@@ -10,13 +10,14 @@
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
-    axios.get('http://39.105.181.238:8080/api/order/confirm?order_type=1&carts_id=46,47,48', {
+    axios.get('http://39.105.181.238:8080/api/order/my?order_type=2', {
         validateStatus: function (status) {
             return status < 500; // 状态码在大于或等于500时才会 reject
         }
     })
     .then(function (response) {
-        console.log(response.data.message);
+        console.log(response.data.data.order_list[0].reserve_info[0].reserve_type_image);
+        // for(response.data)
     })
     .catch(function (error) {
         //console.log(error.response);
