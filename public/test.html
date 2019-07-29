@@ -11,9 +11,9 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
     axios.get('http://39.105.181.238:8080/api/order/my?order_type=2', {
-        validateStatus: function (status) {
-            return status < 500; // 状态码在大于或等于500时才会 reject
-        }
+        // validateStatus: function (status) {
+        //     return status < 500; // 状态码在大于或等于500时才会 reject
+        // }
     })
     .then(function (response) {
         console.log(response.data.data.order_list[0].reserve_info.reserve_type_image);

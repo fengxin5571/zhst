@@ -35,7 +35,7 @@ class AuthToken
             $request->attributes->add(['user'=>$rest_json]);
             return $next($request);
         }catch (\Exception $e){
-            return $this->response->error('用户token验证失败',700);
+            return $this->response->error('用户token验证失败',201);
         }
 
     }
