@@ -78,6 +78,9 @@ $api->version('v1', [
             $api->get('details','OrderController@orderDetails');
         });
 
+        //个人中心
+        $api->get('my','UserController@my');
+
         //智慧发现
         $api->group(['prefix'=>'discover'],function($api){
             //智慧发现接口
