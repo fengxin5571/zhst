@@ -57,6 +57,12 @@ class OrderService{
             $totalNum=0;
             $box_charges=0;
             $carts_id=array_unique(explode(',',$orderinfo['carts_id']));
+            $carts_id=array_filter($carts_id);
+            if(!is_array($carts_id)||empty($carts_id)){
+                $data['error']=true;
+                $data['message']='参数错误';
+                return;
+            }
             foreach($carts_id as $cart_id){
                 $cart=Cart::find($cart_id);
                 if(!$cart){

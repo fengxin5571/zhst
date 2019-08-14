@@ -70,12 +70,16 @@ $api->version('v1', [
             $api->get('confirm','OrderController@confirmOrder');
             //创建订单
             $api->post('add','OrderController@add');
+            //订单支付
+            $api->post('pay','OrderController@orderPay');
             //提交网订预定
             $api->post('/reserve/add','OrderController@reserveAdd');
             //我的订单
             $api->get('my','OrderController@myOrder');
             //订单详情
             $api->get('details','OrderController@orderDetails');
+            //取消订单
+            $api->get('close','OrderController@closeOrder');
         });
 
         //个人中心

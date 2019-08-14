@@ -8,14 +8,16 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Order\Replicate;
 use App\Model\Order;
 use App\Services\Common;
 use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Facades\Admin;
+use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Widgets\Table;
-
+use Encore\Admin\Grid\Displayers\DropdownActions;
 class OrderController extends AdminController
 {
 
@@ -94,6 +96,10 @@ EOT;
                         $status_name='未支付';
                     }elseif ($this->paid==1&&$this->status==0&&$this->refund_status==0){
                         $status_name='待发出';
+                    }elseif ($this->paid==0&&$this->status==-3){
+                        $status_name='已取消';
+                    }elseif($this->paid==1&&$this->status==1&&$this->refund_status==0){
+                        $status_name = '已发出';
                     }
                     return $status_name;
                 });
@@ -103,6 +109,7 @@ EOT;
     protected function grid()
     {
         $grid = new Grid(new Order());
+        $grid->setActionClass(DropdownActions::class);
         $grid->model()->where('order_type',1);
         $grid->column('order_sn', '订单号')->copyable();
         $grid->orderFoods('菜品信息')->display(function ($orderFoods) {
@@ -165,9 +172,14 @@ EOT;
             });
         });
         $grid->actions(function ($actions) {
-//
+            $actions->disableEdit();
+            $actions->add(new Replicate);
         });
         $grid->disableCreateButton();
         return $grid;
+    }
+    protected function form(){
+        $form=new Form(new Order());
+        return $form;
     }
 }

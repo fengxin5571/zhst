@@ -122,10 +122,15 @@ Route::group([
         $router->get('/','OrderController@index');
         //查看订单
         $router->get('/{id}','OrderController@show');
+        //删除外卖订单
+        $router->delete('/{id}','OrderController@destroy');
         //网订预定订单
         $router->get('/reserve/list','ReserveOrderController@index');
+        //确认网订订单
+        $router->get('/reserve/success/{id}','ReserveOrderController@success');
         //删除网订订单
         $router->delete('/reserve/list/{id}','ReserveOrderController@destroy');
+
     });
     //智慧发现
     $router->group(['prefix'=>'discover'],function ($router){

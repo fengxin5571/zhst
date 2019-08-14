@@ -6,6 +6,7 @@
  * Time: 10:41 AM
  */
 namespace App\Admin\Controllers;
+use App\Admin\Extensions\SuccessButton;
 use App\Model\Order;
 use App\Model\ReserveFoodCategory;
 use App\Model\ReserveOrder;
@@ -38,10 +39,14 @@ class ReserveOrderController extends AdminController{
         $grid->column('eat_people','就餐人数');
         $grid->column('eat_time','就餐时间');
         $grid->column('created_at','添加时间')->sortable();
+        $grid->column('status','状态')->using(['0'=>'已预订','1'=>"已确认",'-3'=>'已取消']);
         $grid->actions(function ($actions) {
             $actions->disableEdit();
             $actions->disableView();
+            // append一个操作
+            $actions->prepend(new SuccessButton($actions->getKey()));
         });
+
         $grid->filter(function ($filter){
             $filter->column(1/2, function ($filter) {
                 $filter->equal('order_type','订单类型')->select([''=>'所有','2'=>'网订']);
@@ -62,5 +67,30 @@ class ReserveOrderController extends AdminController{
     protected function form(){
         $form=new Form(new Order());
         return $form;
+    }
+
+    /**
+     * 网订订单确认
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse|void
+     */
+    public function success($id){
+        if(!$id){
+            return;
+        }
+        $data = ['status'  => true];
+        $status=Order::find($id)->status;
+        if($status==1){
+            $data['message']= trans('请勿重复确认');
+            admin_toastr('请勿重复确认', 'error',['timeOut'=>1000]);
+        }elseif($status==-3){
+            $data['message']= trans('此订单已取消');
+            admin_toastr('此订单已取消', 'error',['timeOut'=>1000]);
+        }else{
+            Order::where('id',$id)->update(['status'=>1]);
+            $data['message']= trans('已确认');
+            admin_toastr('已确认', 'success',['timeOut'=>1000]);
+        }
+        return response()->json($data);
     }
 }

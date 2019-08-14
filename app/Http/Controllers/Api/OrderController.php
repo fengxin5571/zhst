@@ -173,7 +173,12 @@ class OrderController extends Controller{
             return $this->response->error($validator->errors()->first(),$this->forbidden_code);
         }
         $orderinfo=$request->all();
-        $data=$this->orderService->store($this->user,$orderinfo);
+        try{
+            $data=$this->orderService->store($this->user,$orderinfo);
+        }catch (\Exception $e){
+            $data['error']=true;
+            $data['message']="提交订单失败";
+        }
         if(!$data['error']){
             return $this->successResponse($data['order']);
         }
@@ -235,7 +240,7 @@ class OrderController extends Controller{
             $query->select('id','order_unique','food_name','food_price','food_image','food_num');
         }])->get($fields);
         $data['order_list']->each(function ($item,$key)use($order_type){
-            $item->status_name=$order_type==1?Common::get_order_status($item):'';
+            $item->status_name=$order_type==1?Common::get_order_status($item):Common::get_r_order_status($item);
             $item->reserve_info=ReserveType::where('id',$item->reserve_type)->first(['reserve_type_image','reserve_type_name']);
         });
         return $this->successResponse($data);
@@ -254,8 +259,48 @@ class OrderController extends Controller{
         if(!$order_id||!$orderInfo){
             return $this->response->error('订单获取失败，id为空或订单不存在',$this->forbidden_code);
         }
-        $orderInfo->status_name=$orderInfo->order_type==1?Common::get_order_status($orderInfo):'';
+        $orderInfo->status_name=$orderInfo->order_type==1?Common::get_order_status($orderInfo):Common::get_r_order_status($orderInfo);
         $orderInfo->reserve_info=ReserveType::where('id',$orderInfo->reserve_type)->get(['reserve_type_name']);
         return $this->successResponse($orderInfo);
+    }
+
+    /**
+     * 取消订单
+     * @param Request $request
+     * @return mixed
+     */
+    public function closeOrder(Request $request){
+        $res=[
+            'status'=>true,
+            'message'=>'取消成功'
+        ];
+        $order_tppe=$request->input('order_type');
+        $order_id=$request->input('order_id');
+        $order=Order::where(['id'=>$order_id,'userid'=>$this->user['userId']])->first();
+        if(!$order_tppe||!$order){
+            return $this->response->error('参数错误或订单不存在',$this->forbidden_code);
+        }
+        if($order_tppe==1){//外卖订单
+            if(!($order->paid==0&&$order->status==0)){
+                $res['status']=false;
+                $res['message']='当前订单已不可取消';
+            }else{
+                $order->update(['status'=>-3]);
+            }
+        }elseif ($order_tppe==2){//网订订单
+            if($order->status==1){//订单为已确认
+                $res['status']=false;
+                $res['message']='当前订单已经确认，不能取消';
+            }else{
+                $order->update(['status'=>-3]);
+            }
+        }
+        if(!$res['status']){
+             return $this->response->error($res['message'],$this->forbidden_code);
+        }
+        return $this->successResponse('',$res['message']);
+    }
+    public function orderPay(Request $request){
+
     }
 }
