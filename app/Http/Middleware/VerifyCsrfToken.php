@@ -19,6 +19,7 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        //
+        '/payment/notify',//支付回调
+        '/food/today', //app首页今日菜谱接口
     ];
 }

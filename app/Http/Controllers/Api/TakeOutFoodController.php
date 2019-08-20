@@ -7,6 +7,7 @@
  */
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
+use App\Model\ReserveFoodPool;
 use App\Model\TakeFoodCategory;
 use App\Model\TakeFoodPool;
 use App\Model\TakeFoodReplyRelation;
@@ -19,13 +20,13 @@ class TakeOutFoodController extends Controller{
      * @return mixed
      */
     public function recommend(Request $request){
-        $fields=['id','name','description','food_image','price','likeCount'];
-        $recommendFood['food_count']=TakeFoodPool::isShow()->isRecommend()->count();
-        $recommendFood['food_list']=TakeFoodPool::isShow()->isRecommend()
+        $fields=['id','name','description','food_image','likeCount'];
+//        $recommendFood['food_count']=ReserveFoodPool::isShow()->count();
+        $recommendFood['food_list']=ReserveFoodPool::isShow()
             ->orderBy('likeCount','desc')->get($fields);
-        $recommendFood['food_list']->each(function($item,$key){
-            $item->is_like=TakeFoodReplyRelation::where(['userid'=>$this->user['userId'],'t_food_id'=>$item->id])->count()?true:false;
-        });
+//        $recommendFood['food_list']->each(function($item,$key){
+//            $item->is_like=TakeFoodReplyRelation::where(['userid'=>$this->user['userId'],'t_food_id'=>$item->id])->count()?true:false;
+//        });
         return $this->successResponse($recommendFood);
     }
 

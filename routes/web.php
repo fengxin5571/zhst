@@ -15,3 +15,7 @@
 //    return view('welcome');
 //});
 Route::redirect('/', '/admin', 301);
+//支付回调
+Route::post('/payment/notify','PaymentController@payNotify')->name('payment.notify');
+//app首页今日菜谱
+Route::get('/food/today','FoodController@todayFood');

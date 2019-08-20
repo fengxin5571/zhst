@@ -8,6 +8,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Admin\Actions\Order\Confirm;
 use App\Admin\Actions\Order\Replicate;
 use App\Model\Order;
 use App\Services\Common;
@@ -48,7 +49,10 @@ class OrderController extends AdminController
             ->breadcrumb(['text' => '订单详情'])
             ->row(Admin::show($info,function($show){
                 $show->panel()
-                    ->title('配送信息');
+                    ->title('配送信息')
+                    ->tools(function ($tools) {
+                        $tools->disableEdit();
+                    });
                 $show->real_name('订餐人：');
                 $show->user_phone('订餐人电话：');
                 $show->user_address('送餐地址：');
@@ -146,7 +150,7 @@ EOT;
         $grid->column('box_charges','餐盒费');
         $grid->column('total_price', '订单总价')->style('text-align: center;');
         $grid->column('paid', '支付状态')->using(['0' => '未支付', '1' => '已支付']);
-        $grid->column('pay_type', '支付方式')->using($this->pay_type);
+        $grid->column('pay_type', '支付方式')->using($this->pay_type)->filter($this->pay_type);
         $grid->column('订单状态')->display(function(){
             return Common::get_order_status($this);
         });
@@ -173,7 +177,14 @@ EOT;
         });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
-            $actions->add(new Replicate);
+            //订单状态为未支付时可取消
+            if($actions->row->paid==0&&$actions->row->status==0){
+                $actions->add(new Replicate);
+            }
+            //订单状态为待发出时可发货
+            if($actions->row->paid==1&&$actions->row->status==0&&$actions->row->refund_status==0){
+                $actions->add(new Confirm());
+            }
         });
         $grid->disableCreateButton();
         return $grid;

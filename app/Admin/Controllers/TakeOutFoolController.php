@@ -66,8 +66,8 @@ class TakeOutFoolController extends AdminController{
         })->sortable();
         $grid->column('is_show','状态')->using(['0'=>'<span class=\'label label-danger\'>未上架</span>','1'=>'<span class=\'label label-success\'>已上架</span>']);
         $grid->column('sellCount','销量')->sortable();
-        $grid->column('likeCount','点赞数')->sortable();
-        $grid->column('is_recommend','特别推荐')->using(['0'=>'否','1'=>'是']);
+//        $grid->column('likeCount','点赞数')->sortable();
+//        $grid->column('is_recommend','特别推荐')->using(['0'=>'否','1'=>'是']);
         $grid->column('created_at','添加时间')->sortable();
         $grid->filter(function($filter){
             $filter->equal('cid','菜品分类')->select(TakeFoodCategory::pluck('cat_name','id'));
@@ -96,7 +96,7 @@ class TakeOutFoolController extends AdminController{
         $form->currency('ot_price','原价价格')->symbol('￥')->required();
         $form->currency('price','菜品价格')->symbol('￥')->required();
         $form->radio('is_show','状态')->options(['0'=>'未上架','1'=>'已上架'])->default(1)->required();
-        $form->radio('is_recommend','特别推荐')->options(['0'=>'否','1'=>'是'])->default(0);
+//        $form->radio('is_recommend','特别推荐')->options(['0'=>'否','1'=>'是'])->default(0);
         $form->divider('规格参数');
         $form->currency('box_charge','餐盒费')->symbol('￥');
         $form->number('weight','菜品重量(单位：K)')->min(1)->default(1);

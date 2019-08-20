@@ -15,6 +15,7 @@ use App\Model\TakeFoodPool;
 use App\Services\Common;
 use function App\Services\get_order_status;
 use App\Services\OrderService;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -125,7 +126,7 @@ class OrderController extends Controller{
                 $value=explode(',',$value);
                 $cart_list=Cart::whereIn('id',$value)->where('userid',$this->user['userId'])->get();
                 if(!$cart_list->toArray()){
-                    $fail('购物车菜品失效');
+                    $fail('购物车数据不存在');
                     return;
                 }
                 //订单类型1为外卖菜品；2为网上订餐
@@ -135,7 +136,7 @@ class OrderController extends Controller{
                         if($item->food_type==1){
                             //不存在数据或已经下架
                             if(!$item->takeFood||!$item->takeFood->is_show){
-                                $fail('购物车菜品失效');
+                                $fail('菜品不存在或已经下架');
                                 return;
                             }
                         }else{//如果为套餐
@@ -238,7 +239,7 @@ class OrderController extends Controller{
         $fields=['id','order_sn','order_type','unique','created_at','reserve_type','paid','refund_status','status'];
         $data['order_list']=Order::where(['order_type'=>$order_type,'userid'=>$this->user['userId']])->with(['orderFoods'=>function($query){
             $query->select('id','order_unique','food_name','food_price','food_image','food_num');
-        }])->get($fields);
+        }])->orderBy('created_at','desc')->get($fields);
         $data['order_list']->each(function ($item,$key)use($order_type){
             $item->status_name=$order_type==1?Common::get_order_status($item):Common::get_r_order_status($item);
             $item->reserve_info=ReserveType::where('id',$item->reserve_type)->first(['reserve_type_image','reserve_type_name']);
@@ -300,7 +301,34 @@ class OrderController extends Controller{
         }
         return $this->successResponse('',$res['message']);
     }
+
+    /**
+     * 订单支付
+     * @param Request $request
+     * @return mixed
+     */
     public function orderPay(Request $request){
+        try{
+            $order_id=$request->input('order_id');
+            $order=Order::find($order_id);
+            if(!$order_id||!$order){
+                return $this->response->error('订单id我空或订单不存在',$this->forbidden_code);
+            }
+            if($order->paid){//订单已经支付
+                return $this->response->error('订单已经支付',$this->forbidden_code);
+            }
+            if(!($order->paid==0&&$order->status==0)){//订单状态不是未支付
+                return $this->response->error('订单状态不正确',$this->forbidden_code);
+            }
+            $pay=new PaymentService();
+            $result=$pay->pay($order,$this->user,$order->pay_type);
+            if($result['error']){
+                return $this->response->error($result['message'],$this->forbidden_code);
+            }
+            return $this->successResponse($result);
+        }catch (\Exception $e){
+                return $this->response->error($e->getMessage(),$this->forbidden_code);
+        }
 
     }
 }
