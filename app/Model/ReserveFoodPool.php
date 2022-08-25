@@ -39,13 +39,11 @@ class ReserveFoodPool extends Eloquent
 	protected $casts = [
 		'cid' => 'int',
 		'point' => 'int',
-		'sellCount' => 'int',
 		'likeCount' => 'int',
 		'is_show' => 'int',
 		'mer_id' => 'int',
-		'weight' => 'float(10,2)',
-		'calorie' => 'int',
-		'food_type' => 'int'
+		'food_type' => 'int',
+        'price'    =>'float(10,2)'
 	];
 
 	protected $fillable = [
@@ -57,12 +55,24 @@ class ReserveFoodPool extends Eloquent
 		'sellCount',
 		'likeCount',
 		'is_show',
+        'is_new',
 		'mer_id',
-		'weight',
-		'calorie',
 		'food_type',
         'is_today',
-        'cook'
+        'cook',
+        'cook_image',
+        'cook_speciality',
+        'cook_group',
+        'price',
+        'is_today_leader',
+        'is_today_employ',
+        'health_images',
+        'health_content',
+        'is_health',
+        'is_exchange',
+        'calorie',
+        'ex_content',
+        'is_recommend'
 	];
     public static function boot(){
         parent::boot();
@@ -80,7 +90,52 @@ class ReserveFoodPool extends Eloquent
     }
     public function getFoodImageAttribute($value)
     {
-        return config('filesystems.disks.admin.url').'/'.$value;
+        if($value){
+            return config('filesystems.disks.admin.url').'/'.$value;
+        }else{
+            return '';
+        }
+    }
+    public function getCookImageAttribute($value)
+    {
+        if($value){
+            return config('filesystems.disks.admin.url').'/'.$value;
+        }else{
+            return '';
+        }
+
+    }
+    public function getIsTodayLeaderAttribute($value){
+        return explode(',',$value);
+    }
+    public function getIsTodayEmployAttribute($value){
+        return explode(',',$value);
+    }
+    public function getIsRecommendAttribute($value){
+        return explode(',',$value);
+    }
+    public function setIsTodayLeaderAttribute($value){
+        $this->attributes['is_today_leader'] = implode(',',$value);
+    }
+    public function setIsTodayEmployAttribute($value){
+        $this->attributes['is_today_employ'] = implode(',',$value);
+    }
+    public function setIsRecommendAttribute($value){
+        $this->attributes['is_recommend'] = implode(',',$value);
+    }
+    public function setHealthImagesAttribute($image)
+    {
+        if (is_array($image)) {
+            foreach ($image as $k=>$value){
+                $image[$k]=config('filesystems.disks.admin.url').'/'.$value;
+            }
+            $this->attributes['health_images'] = json_encode($image);
+        }
+    }
+
+    public function getHealthImagesAttribute($image)
+    {
+        return json_decode($image, true);
     }
     //上架网订菜品
     public function scopeIsShow($query){

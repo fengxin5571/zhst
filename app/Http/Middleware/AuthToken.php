@@ -31,7 +31,19 @@ class AuthToken
 //            if(!$rest_json||isset($rest_json['code'])&&$rest_json['code']==700){
 //                throw  new \Exception();
 //            }
-            $request->attributes->add(['user'=>['userId'=>'1124151110244003841','name'=>'xiaoy','avatar'=>'']]);
+            $request->attributes->add(['user'=>[
+                'account'=>'xiaoy',
+                'address'=>'山西省运城市XXXXXX',
+                'avater'=>'xiaoy',
+                'userId'=>'1124151110244003841',
+                'birthday'=>'2019-05-03 00:00:00',
+                'deptId'  =>'1124193820191494146',
+                'deptName'=>'',
+                'email'   =>'xiaoy@qq.com',
+                'name'=>'xiaoy',
+                'phone'=>'18636984057',
+                ]
+            ]);
 //            $request->attributes->add(['user'=>$rest_json]);
             return $next($request);
         }catch (\Exception $e){

@@ -32,7 +32,8 @@ EOT;
     public function render()
     {
         Admin::script($this->script());
-        $options=ReserveType::all()->pluck('reserve_type_name','id');
+//        $options=ReserveType::all()->pluck('reserve_type_name','id');
+        $options=['1'=>'早餐','2'=>'午餐','3'=>'加班餐'];
         return view('admin.tools.gender', compact('options'));
     }
 }

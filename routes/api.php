@@ -32,7 +32,13 @@ $api->version('v1', [
             //外卖菜品点赞,取消
             $api->get('like','TakeOutFoodController@like');
         });
-
+        //网上超市
+        $api->group(['prefix'=>'marketFood'],function ($api){
+            //网超菜品分类
+            $api->get('category','MarketFoodController@category');
+            //网超预定菜品
+            $api->get('foods','MarketFoodController@foods');
+        });
         //网上订餐
         $api->group(['prefix'=>'reserve'],function ($api){
             //网订类型
@@ -41,10 +47,24 @@ $api->version('v1', [
             $api->get('category','ReserveFoodController@category');
             //网订菜品
             $api->get('food','ReserveFoodController@food');
-            //今日菜谱
-            $api->get('todayFood','ReserveFoodController@today');
+            //健康养生
+            $api->get('health','ReserveFoodController@health');
+            //养生详情
+            $api->get('health/info','ReserveFoodController@shealthInfo');
+            //厨艺交流
+            $api->get('exchange','ReserveFoodController@exchange');
+            //厨艺详情
+            $api->get('exchange/info','ReserveFoodController@exchangeInfo');
+            //周菜谱
+            $api->get('/weekly/menu','ReserveMenuController@weekly');
+            //今日菜谱领导
+            $api->get('todayFood/leader','ReserveFoodController@todayLeader');
+            //今日菜谱员工
+            $api->get('todayFood/employ','ReserveFoodController@todayEmploy');
             //网订菜品点赞，取消
             $api->get('like','ReserveFoodController@like');
+            //网订菜品差评，取消
+            $api->get('bad','ReserveFoodController@bad');
             //网订菜品评论列表
             $api->get('comment','ReserveFoodController@comment');
             //网订菜品评论
@@ -90,7 +110,11 @@ $api->version('v1', [
             //智慧发现接口
             $api->get('/','DdiscoverController@index');
         });
+        //新品推荐
+        $api->get('food/new','ReserveMenuController@new');
 
+        //公告
+        $api->get('notice','NoticeController@notice');
     });
     //获取菜品类型select联动
     $api->get('/food_type','FoodsController@type');

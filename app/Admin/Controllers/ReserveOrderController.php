@@ -6,6 +6,7 @@
  * Time: 10:41 AM
  */
 namespace App\Admin\Controllers;
+use App\Admin\Actions\Order\payOrder;
 use App\Admin\Extensions\SuccessButton;
 use App\Model\Order;
 use App\Model\ReserveFoodCategory;
@@ -15,8 +16,11 @@ use Encore\Admin\Controllers\AdminController;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
-
+use App\Services\Common;
+use Encore\Admin\Grid\Displayers\DropdownActions;
+use App\Admin\Actions\Order\Replicate;
 class ReserveOrderController extends AdminController{
+    protected $pay_type=['weixin' => '微信支付', 'allipay' => '支付宝', 'card' => '一卡通'];
     /**
      * 订单列表
      * @param Content $content
@@ -30,21 +34,80 @@ class ReserveOrderController extends AdminController{
     }
     protected function grid(){
         $grid=new Grid(new Order());
+        $grid->setActionClass(DropdownActions::class);
         $grid->model()->where('order_type',2);
-        $grid->column('id','ID')->sortable();
         $grid->column('order_sn', '预定单号')->copyable();
         $grid->column('reserve_type','网订类型')->using(ReserveType::pluck('reserve_type_name','id')->toArray());
-        $grid->column('real_name', '订餐人');
-        $grid->column('user_phone', '订餐人电话');
+        $grid->column('订单菜品')->display(function (){
+            if($this->order_type==2&&$this->reserve_type==3){
+                $orderFoods = array_map(function ($food) {
+                    return <<<EOT
+             <div class="layui-table-cell laytable-cell-1-0-2">   
+                 <p> 
+                     <span> 
+                        <img style="width: 30px;height: 30px;margin:0;cursor: pointer;" src="{$food['food_image']}"> 
+                     </span> 
+                     <span>{$food['food_name']}</span> 
+                     <span> | ￥{$food['food_price']} × {$food['food_num']}</span>
+                 </p>   
+             </div>   
+EOT;
+                }, $this->orderFoods->toArray());
+
+                return join('&nbsp;', $orderFoods);
+            }
+        });
+        $grid->column('订餐人信息')->display(function(){
+            return <<<EOT
+             <div class="layui-table-cell laytable-cell-1-0-2">   
+                 <p> 
+                     姓名：<span class="label label-primary">{$this->real_name} </span> 
+                 </p>   
+                 <p> 
+                     电话：<span class="label label-primary">{$this->user_phone}</span>
+                 </p>   
+             </div>   
+EOT;
+
+        });
         $grid->column('eat_people','就餐人数');
-        $grid->column('eat_time','就餐时间');
+        $grid->column('就餐时间')->display(function (){
+            $time='无就餐时间';
+//            if($this->order_type==2&&$this->reserve_type==3){
+//                $time=$this->get_time->toDateTimeString();
+//            }
+            if($this->order_type==2&&$this->reserve_type==1){
+                $time='18:00-19:00';
+            }elseif ($this->order_type==2&&$this->reserve_type==2||$this->order_type==2&&$this->reserve_type==3){
+                $time='11:50-13:00';
+            }
+            return $time;
+        });
+        $grid->column('total_price', '订单总价')->style('text-align: center;')->display(function (){
+            $price=$this->total_price;
+            if($this->order_type==2&&$this->reserve_type==1){
+                $price='此订单无支付';
+            }
+            return $price;
+        });
         $grid->column('created_at','添加时间')->sortable();
-        $grid->column('status','状态')->using(['0'=>'已预订','1'=>"已确认",'-3'=>'已取消']);
+        $grid->column('pay_type', '支付方式')->using($this->pay_type)->filter($this->pay_type);
+        $grid->column('订单状态')->display(function(){
+            return Common::get_r_reserve_order_status($this);
+        });
         $grid->actions(function ($actions) {
             $actions->disableEdit();
             $actions->disableView();
             // append一个操作
-            $actions->prepend(new SuccessButton($actions->getKey()));
+           // $actions->prepend(new SuccessButton($actions->getKey()));
+            //订单状态为未支付时可取消
+            if($actions->row->paid==0&&$actions->row->status==0){
+                $actions->add(new Replicate);
+                if($actions->row->reserve_type==3){
+                    $actions->add(new payOrder);
+                }
+            }
+
         });
 
         $grid->filter(function ($filter){

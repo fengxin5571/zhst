@@ -22,11 +22,14 @@ use Reliese\Database\Eloquent\Model as Eloquent;
 class ReserveType extends Eloquent
 {
 	protected $table = 'reserve_type';
-
+    protected $casts = [
+        'reserve_price'    =>'float(10,2)'
+    ];
 	protected $fillable = [
 	    'reserve_type_seting',
 		'reserve_type_name',
-        'reserve_type_image'
+        'reserve_type_image',
+        'reserve_price'
 	];
     public function getReserveTypeImageAttribute($value)
     {

@@ -15,6 +15,7 @@ class ReserveFoodReplyRelation extends Eloquent{
     protected $fillable=[
         'userid',
         'r_food_id',
+        'type'
     ];
 
 }

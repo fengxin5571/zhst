@@ -46,5 +46,5 @@ Encore\Admin\Grid::init(function (Encore\Admin\Grid $grid){
     $grid->paginate(20);
 });
 Admin::navbar(function (\Encore\Admin\Widgets\Navbar $navbar) {
-    //$navbar->right(new \App\Admin\Extensions\Nav\Links());
+    $navbar->right(new \App\Admin\Extensions\Nav\Links());
 });

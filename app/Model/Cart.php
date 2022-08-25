@@ -43,4 +43,12 @@ class Cart extends Eloquent
 	public function takeFood(){
 	    return $this->hasOne(TakeFoodPool::class,'id','food_id');
     }
+    //网超菜品
+    public function marketFood(){
+        return $this->hasOne(MarketFoodPool::class,'id','food_id');
+    }
+    //网订菜品
+    public function reserveFood(){
+        return $this->hasOne(ReserveFoodPool::class,'id','food_id');
+    }
 }

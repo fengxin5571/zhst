@@ -2,27 +2,22 @@
 /**
  * Created by PhpStorm.
  * User: fengxin
- * Date: 2019/7/2
- * Time: 4:35 PM
+ * Date: 2019/9/8
+ * Time: 12:17 PM
  */
-
 namespace App\Admin\Controllers;
-
-use App\Admin\Actions\Order\Confirm;
 use App\Admin\Actions\Order\payOrder;
-use App\Admin\Actions\Order\Replicate;
 use App\Model\Order;
-use App\Services\Common;
 use Encore\Admin\Controllers\AdminController;
-use Encore\Admin\Facades\Admin;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Layout\Content;
-use Encore\Admin\Widgets\Table;
 use Encore\Admin\Grid\Displayers\DropdownActions;
-class OrderController extends AdminController
-{
-
+use App\Services\Common;
+use App\Admin\Actions\Order\Confirm;
+use App\Admin\Actions\Order\Replicate;
+use Encore\Admin\Facades\Admin;
+class MarketOrderController extends AdminController{
     protected $pay_type=['weixin' => '微信支付', 'allipay' => '支付宝', 'card' => '一卡通'];
     /**
      * 订单列表
@@ -36,7 +31,6 @@ class OrderController extends AdminController
             ->breadcrumb(['text' => '订单管理'])
             ->body($this->grid());
     }
-
     /**
      * 查看订单
      * @param mixed $id
@@ -86,15 +80,12 @@ EOT;
                     return $html;
                 });
                 $show->total_num('菜品总数：');
-                $show->box_charges('餐盒费：')->as(function ($box_charges){
-                    return '￥'.$box_charges;
-                });
                 $show->total_price('订单总价：')->as(function ($total_price){
                     return '￥'.$total_price;
                 });
                 $pay_types=$this->pay_type;
                 $show->pay_type('支付方式：')->as(function ($pay_type)use($pay_types){
-                       return $pay_types[$pay_type];
+                    return $pay_types[$pay_type];
                 });
                 $show->status('订单状态：')->as(function($status){
                     if($this->paid==0&&$this->status==0){
@@ -115,7 +106,7 @@ EOT;
     {
         $grid = new Grid(new Order());
         $grid->setActionClass(DropdownActions::class);
-        $grid->model()->where('order_type',1);
+        $grid->model()->where('order_type',3);
         $grid->column('order_sn', '订单号')->copyable();
         $grid->orderFoods('菜品信息')->display(function ($orderFoods) {
             $orderFoods = array_map(function ($food) {
@@ -148,7 +139,6 @@ EOT;
 EOT;
 
         });
-        $grid->column('box_charges','餐盒费');
         $grid->column('total_price', '订单总价')->style('text-align: center;');
         $grid->column('paid', '支付状态')->using(['0' => '未支付', '1' => '已支付']);
         $grid->column('pay_type', '支付方式')->using($this->pay_type)->filter($this->pay_type);
@@ -159,7 +149,7 @@ EOT;
 
         $grid->filter(function ($filter){
             $filter->column(1/2, function ($filter) {
-                $filter->equal('order_type','订单类型')->select([''=>'所有','1'=>'外卖']);
+                $filter->equal('order_type','订单类型')->select([''=>'所有','3'=>'网超']);
                 $filter->equal('real_name','订餐人')->placeholder('请输入订餐人姓名查询');
                 $filter->equal('user_phone','电话')->placeholder('请输入订餐人电话查询');
                 $filter->equal('pay_type','支付方式')->radio($this->pay_type);
@@ -182,7 +172,6 @@ EOT;
             if($actions->row->paid==0&&$actions->row->status==0){
                 $actions->add(new payOrder);
                 $actions->add(new Replicate);
-
             }
             //订单状态为待发出时可发货
             if($actions->row->paid==1&&$actions->row->status==0&&$actions->row->refund_status==0){

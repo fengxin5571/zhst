@@ -8,6 +8,8 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Model\Cart;
+use App\Model\MarketFoodPool;
+use App\Model\ReserveFoodPool;
 use App\Model\TakeFoodPool;
 use App\Services\CartService;
 use Illuminate\Http\Request;
@@ -48,8 +50,11 @@ class CartController extends Controller{
                     }else{//如果是套餐
                         $foodsku='';
                     }
+
+                }elseif($request->input('type')==3){//如果是网超
+                    $foodsku=MarketFoodPool::class;
                 }else{//如果是网订
-                    $foodsku='';
+                    $foodsku=ReserveFoodPool::class;
                 }
                 if(!$food=$foodsku::find($value)){
                     $fail('该菜品不存在');
@@ -59,19 +64,27 @@ class CartController extends Controller{
                     $fail('该菜品未上架');
                     return ;
                 }
+                if($request->input('type')==1){
+                    if($request->input('flog')=='+'&&$request->input('num')>$food->stock){
+                        $fail('该菜品库存不足');
+                        return ;
+                    }
+                }
+
             }],
             'num'=>'required|min:1',
         ],$message);
         if($validator->fails()){
             return $this->response->error($validator->errors()->first(),$this->forbidden_code);
         }
-        if($item=$this->cartService
-            ->add($request->input('food_id'),$request->input('num'),$request->input('type'),$request->input('food_type'),$this->user,$flog)){
+        $item=$this->cartService
+            ->add($request->input('food_id'),$request->input('num'),$request->input('type'),$request->input('food_type'),$this->user,$flog);
+        if(!$item['error']){
             $data['cart_count']=Cart::where(['userid'=>$this->user['userId'],'type'=>$request->input('type')])->sum('cart_num');
-            $data['food_info']=$item;
+            $data['cart_info']=$item['carts'];
             return $this->successResponse($data,'成功');
         }
-        return $this->response->error('失败',$this->forbidden_code);
+        return $this->response->error($item['message'],$this->forbidden_code);
     }
     /**
      * 查看购物车
@@ -85,20 +98,28 @@ class CartController extends Controller{
         $cartList=Cart::where(['userid'=>$this->user['userId'],'type'=>$type])->get(['id','food_id','type','cart_num','food_type','created_at']);
         $data['food_list']=Cart::where(['userid'=>$this->user['userId'],'type'=>$type]);
         $cartList->each(function ($item,$key) use($type,$cart){
-            //type为1为外卖菜品2为网上订购菜品
+            //type为1为外卖菜品2为网上订购菜品3网上超市
             if($type==1){
                 //如果为普通商品
                 if($item->food_type==1){
                     $item['food_list']=$cart->with('takeFood:id,name,food_image,price,description');
                 }
 
+            }elseif($type==3){//如果是网超
+                $item['food_list']=$cart->with('marketFood:id,name,food_image,price,description');
             }else{
-
+                $item['food_list']=$cart->with('reserveFood:id,name,food_image,price,description');
             }
         });
         $data['food_list']=$cart->get(['id','food_id','type','cart_num','food_type','created_at']);
         $data['food_list']->each(function($item,$key) use(&$cart_count,&$price_count){
-            $item->foodCountPrice=bcmul($item->takeFood->price,$item->cart_num,2);
+            if($item->type==1){//如果是外卖
+                $item->foodCountPrice=bcmul($item->takeFood->price,$item->cart_num,2);
+            }elseif ($item->type==3){//如果是网超
+                $item->foodCountPrice=bcmul($item->marketFood->price,$item->cart_num,2);
+            }elseif ($item->type==2){
+                $item->foodCountPrice=bcmul($item->reserveFood->price,$item->cart_num,2);
+            }
             //计算购物车总数,购物车总价
             $cart_count+=$item->cart_num;
             $price_count+=$item->foodCountPrice;
@@ -117,16 +138,29 @@ class CartController extends Controller{
      */
     public function Cartnum(Request $request){
         $type=$request->input('type',1);
-        $food=$type==1?'takeFood':'';$price_count=0;
+        $price_count=0;
+        if($type==1){
+            $food='takeFood';
+        }elseif ($type==2){
+            $food='reserveFood';
+        }elseif ($type==3){
+            $food='marketFood';
+        }
         $data['cart_count']=Cart::where(['userid'=>$this->user['userId'],'type'=>$type])->sum('cart_num');
         Cart::where(['userid'=>$this->user['userId'],'type'=>$type])->with("{$food}")->get()
             ->each(function($item,$key) use(&$price_count){
-                $price_count+=bcmul($item->takeFood->price,$item->cart_num,2);
+                if($item->type==1){
+                    $price_count+=bcmul($item->takeFood->price,$item->cart_num,2);
+                }elseif ($item->type==2){
+                    $price_count+=bcmul($item->reserveFood->price,$item->cart_num,2);
+                }elseif ($item->type==3){
+                    $price_count+=bcmul($item->marketFood->price,$item->cart_num,2);
+                }
+
             });
         $data['price_count']=number_format($price_count,2);
         return $this->successResponse($data);
     }
-
     /**
      * 清空购物车
      * @param Request $request
@@ -135,8 +169,11 @@ class CartController extends Controller{
     public function remove(Request $request)
     {
         $type=$request->input('type',1);
-        $this->cartService->remove($type,$this->user);
-        return $this->successResponse([],'成功');
+        $data=$this->cartService->remove($type,$this->user);
+        if($data['error']){
+            return $this->response->error($data['message'],$this->forbidden_code);
+        }
+        return $this->successResponse([],$data['message']);
 
     }
 }

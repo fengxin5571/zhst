@@ -55,13 +55,17 @@ class TakeFoodPool extends Eloquent
 		'likeCount',
         'point',
 		'is_show',
+        'is_new',
 		'mer_id',
         'weight',
+        'stock',
+        'limit',
         'calorie',
         'ot_price',
+        'price',
         'box_charge',
         'is_recommend',
-        'is_today'
+
 	];
     public function getFoodImageAttribute($value)
     {

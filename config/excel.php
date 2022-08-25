@@ -41,7 +41,7 @@ return [
             'excel_compatibility'    => false,
         ],
     ],
-
+    'to_ascii' => false,
     'imports'            => [
 
         'read_only' => true,
@@ -57,7 +57,7 @@ return [
             | Available options: none|slug|custom
             |
             */
-            'formatter' => 'slug',
+            'formatter' => 'none',
         ],
 
         /*

@@ -7,6 +7,7 @@
  */
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
+use App\Model\Cart;
 use App\Model\ReserveFoodPool;
 use App\Model\TakeFoodCategory;
 use App\Model\TakeFoodPool;
@@ -20,7 +21,7 @@ class TakeOutFoodController extends Controller{
      * @return mixed
      */
     public function recommend(Request $request){
-        $fields=['id','name','description','food_image','likeCount'];
+        $fields=['id','name','description','food_image','price','likeCount'];
 //        $recommendFood['food_count']=ReserveFoodPool::isShow()->count();
         $recommendFood['food_list']=ReserveFoodPool::isShow()
             ->orderBy('likeCount','desc')->get($fields);
@@ -64,6 +65,17 @@ class TakeOutFoodController extends Controller{
      */
     public function category(Request $request){
         $categoryList['category_list']=TakeFoodCategory::get(['id','cat_name']);
+        $cart_list=Cart::where(['userid'=>$this->user['userId'],'type'=>1,'food_type'=>1])->get();
+        //dd($cart_num);
+        $categoryList['category_list']->each(function($item,$key) use($cart_list){
+            $item->cart_num=0;
+            foreach ($cart_list as $cart){
+                if($cart->takeFood->foodCategory->id==$item->id){
+                    $item->cart_num=$item->cart_num+$cart->cart_num;
+                }
+            }
+
+        });
         return $this->successResponse($categoryList);
     }
 
@@ -73,7 +85,7 @@ class TakeOutFoodController extends Controller{
      * @return mixed
      */
     public function foods(Request $request){
-        $fields=['id','cid','name','food_type','description','food_image','ot_price','point','price','sellCount','likeCount'];
+        $fields=['id','cid','name','food_type','description','food_image','ot_price','point','price','sellCount','likeCount','limit','stock'];
         $food_list['food_list']=TakeFoodCategory::get(['id','cat_name']);
         $food_list['food_list']->each(function($item,$key) use($fields){
             $item['foods']=TakeFoodPool::where('cid',$item->id)->isShow()->groupBy('cid','id')->get($fields)->each(function ($item,$key){

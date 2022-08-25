@@ -8,7 +8,9 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Model\Cart;
+use App\Model\MarketFoodPool;
 use App\Model\Order;
+use App\Model\ReserveFoodPool;
 use App\Model\ReserveOrder;
 use App\Model\ReserveType;
 use App\Model\TakeFoodPool;
@@ -50,9 +52,9 @@ class OrderController extends Controller{
                     $fail('购物车菜品失效');
                     return;
                 }
-                //订单类型1为外卖菜品；2为网上订餐
+                //订单类型1为外卖菜品；2为网上订餐；3为网超
                 if($request->input('order_type')==1){
-                    $cart_list->each(function ($item,$key)use($fail){
+                    $cart_list->each(function ($item,$key)use($fail,$value){
                         //如果菜品类型普通菜品
                         if($item->food_type==1){
                             //不存在数据或已经下架
@@ -63,9 +65,32 @@ class OrderController extends Controller{
                         }else{//如果为套餐
 
                         }
+                        if(strtotime($item->updated_at)+config('expire_time')*60<time()){
+                            TakeFoodPool::where('id',$item->food_id)->update(['stock'=>$item->takeFood->stock+$item->cart_num]);
+                            cart::destroy($item->id);
+                            if(!Cart::whereIn('id',$value)->where('userid',$this->user['userId'])->get()->toArray()){
+                                $fail('购物车菜品超时');
+                                return;
+                            }
+                            //return;
+                        }
+                    });
+                }elseif ($request->input('order_type')==3){//如果是网超
+                    $cart_list->each(function ($item,$key)use($fail,$value){
+                        //不存在数据或已经下架
+                        if(!$item->marketFood||!$item->marketFood->is_show){
+                            $fail('购物车菜品失效');
+                            return;
+                        }
                     });
                 }else{//如果为网订
-
+                    $cart_list->each(function ($item,$key)use($fail,$value){
+                        //不存在数据或已经下架
+                        if(!$item->reserveFood||!$item->reserveFood->is_show){
+                            $fail('购物车菜品失效');
+                            return;
+                        }
+                    });
                 }
             }]
         ],$message);
@@ -88,16 +113,35 @@ class OrderController extends Controller{
                 }else{
 
                 }
-            }else{//如果是网订
+            }elseif ($item->type==3){//如果是网超
+                $marketFood=MarketFoodPool::where('id',$item->food_id)->first(['id','name','food_image','price']);
+                //获取菜品信息
+                $item->food_info=$marketFood;
+                //计算订单价格
+                $price_count=bcadd($price_count,bcmul($marketFood->price,$item->cart_num,2),2);
 
+            }else{//如果是网订
+                $reserveFood=ReserveFoodPool::where('id',$item->food_id)->first(['id','name','food_image','price']);
+                //获取菜品信息
+                $item->food_info=$reserveFood;
+                //计算订单价格
+                $price_count=bcadd($price_count,bcmul($reserveFood->price,$item->cart_num,2),2);
             }
         });
         $cart_list['order_type']=$request->input('order_type');
         $cart_list['cart_count']=Cart::where(['userid'=>$this->user['userId']])->whereIn('id',$carts_id)->sum('cart_num');
         $cart_list['box_charges']=$box_charges;
         $cart_list['price_count']=bcadd($price_count,$cart_list['box_charges'],2);
-//        $userid=$this->user['userId'];
-        //Cache::put('user_order_'.$this->user['userId'],compact('carts_id','userid'),10);
+        if($request->input('order_type')==1){//订单为外卖时
+            $cart_list['expire_time']=(config('expire_time')?:0).'分钟';
+            $cart_list['create_order_time']=config('take_out_start').'-'.config('take_out_end');
+            $cart_list['get_time']=config('get_time_start').'-'.config('get_time_end');
+        }elseif ($request->input('order_type')==2){//订单为网订
+
+        }elseif ($request->input('order_type')==3){//订单为网超
+            $cart_list['get_time']=date('Y-m-d');
+        }
+
         return $this->successResponse($cart_list);
     }
     /**
@@ -110,10 +154,10 @@ class OrderController extends Controller{
         $message=[
             'order_type.required'=>'订单类型不能为空',
             'unique.required'=>'唯一标识不能为空',
-            'real_name.required'=>'订餐人姓名不能为空',
-            'user_phone.required'=>'订餐人电话不能为空',
-            'user_phone.is_mobile'=>'订餐人电话格式不正确',
-            'pay_type.required'=>'支付方式不能为空',
+//            'real_name.required'=>'订餐人姓名不能为空',
+//            'user_phone.required'=>'订餐人电话不能为空',
+//            'user_phone.is_mobile'=>'订餐人电话格式不正确',
+//            'pay_type.required'=>'支付方式不能为空',
         ];
         $rule=[
             'order_type'=>'required',
@@ -147,26 +191,50 @@ class OrderController extends Controller{
 
                 }
             }],
-            'real_name'=>'required',
-            'user_phone'=>'required|is_mobile',
-            'pay_type'=>'required',
+//            'real_name'=>'required',
+//            'user_phone'=>'required|is_mobile',
+//            'pay_type'=>'required',
         ];
         //判断订单是外卖还是网订
-        if($type==1){
+        if($type==1){//外卖菜品
             $message=array_merge($message,[
                 'user_address.required'=>'取餐地址不能为空',
-                'get_time.required'=>'取餐时间不能为空',
+                'real_name.required'=>'订餐人姓名不能为空',
+                'user_phone.required'=>'订餐人电话不能为空',
+                'user_phone.is_mobile'=>'订餐人电话格式不正确',
+                'pay_type.required'=>'支付方式不能为空',
             ]);
             $rule=array_merge($rule,[
                 'user_address'=>'required',
-                'get_time' =>'required',
+                'real_name'=>'required',
+                'user_phone'=>'required|is_mobile',
+                'pay_type'=>'required',
             ]);
-        }else{
+        }elseif($type==3){//网超菜品
             $message=array_merge($message,[
-                'eat_time.required'=>'就餐时间不能为空',
+                'user_address.required'=>'取餐地址不能为空',
+                'real_name.required'=>'订餐人姓名不能为空',
+                'user_phone.required'=>'订餐人电话不能为空',
+                'user_phone.is_mobile'=>'订餐人电话格式不正确',
+                'pay_type.required'=>'支付方式不能为空',
+                //'get_time.required'=>'取货时间不能为空'
             ]);
             $rule=array_merge($rule,[
-                'eat_time'=>'required'
+                'user_address'=>'required',
+                'real_name'=>'required',
+                'user_phone'=>'required|is_mobile',
+                'pay_type'=>'required',
+                //'get_time'=>'required'
+            ]);
+        }else{//网订菜品
+            $message=array_merge($message,[
+                'eat_people.required'=>'用餐人数不能为空',
+                'eat_people.numeric' =>'用餐人数必须是数字',
+                'pay_type.required'=>'支付方式不能为空',
+            ]);
+            $rule=array_merge($rule,[
+                'eat_people'=>'required|numeric',
+                'pay_type' =>'required',
             ]);
         }
         $validator=Validator::make($request->all(),$rule,$message);
@@ -187,41 +255,105 @@ class OrderController extends Controller{
     }
 
     /**
-     * 提交网订预定单
+     * 网订加班餐、自助餐，自助点餐提交订单
      * @param Request $request
      * @return mixed
      */
     public function reserveAdd(Request $request){
-        $sn=Order::findAvailableNo();
+        $type=$request->input('reserve_type',1);
         $message=[
             'unique.required'=>'唯一标识不能为空',
             'unique.unique'=>'请勿重复提交预定',
-            'real_name.required'=>'订餐人姓名不能为空',
-            'user_phone.required'=>'订餐人电话不能为空',
-            'user_phone.is_mobile'=>'订餐人电话格式不正确',
-            'eat_people.required'=>'就餐人数不能为空',
-            'eat_people.numeric'=>'就餐人数必须为数字',
-            'eat_people.gt'=>'就餐人数必须大于0',
-            'eat_time.required'=>'就餐时间不能为空',
             'reserve_type.required'=>'网订类型id不能为空',
             'reserve_type.numeric'=>'网订类型id必须为数字',
+//            'reserve_type.max'=>'不支持自助点餐下单'
         ];
-        $validator=Validator::make($request->all(),[
+        $rule=[
             'unique'=>'required|unique:order,unique',
-            'real_name'=>'required',
-            'user_phone'=>'required|is_mobile',
-            'eat_people'=>'required|numeric|gt:0',
-            'eat_time'  =>'required',
-            'reserve_type'=>'required|numeric'
-
-        ],$message);
+            'reserve_type'=>'required|numeric',
+        ];
+        if($type==2){//自助餐预定
+            $message=array_merge($message,[
+                'eat_people.required'=>'用餐人数不能为空',
+                'eat_people.numeric' =>'用餐人数必须是数字',
+                'pay_type.required'=>'支付方式不能为空',
+            ]);
+            $rule=array_merge($rule,[
+                'eat_people'=>'required|numeric',
+                'pay_type' =>'required'
+            ]);
+        }elseif ($type==3){//自助点餐
+            $message=array_merge($message,[
+                'eat_people.required'=>'用餐人数不能为空',
+                'eat_people.numeric' =>'用餐人数必须是数字',
+                'pay_type.required'=>'支付方式不能为空',
+                'get_time.required'=>'就餐时间不能为空',
+                'carts_id.required'=>'购物车id不能为空',
+            ]);
+            $rule=array_merge($rule,[
+                'eat_people'=>'required|numeric',
+                'pay_type' =>'required',
+                'get_time' =>'required',
+                'carts_id' =>['required',function($attribute, $value, $fail) use($request){
+                    if(!$value){
+                        $fail('购物车id不能为空');
+                        return;
+                    }
+                    $value=explode(',',$value);
+                    $cart_list=Cart::whereIn('id',$value)->where('userid',$this->user['userId'])->get();
+                    if(!$cart_list->toArray()){
+                        $fail('购物车数据不存在');
+                        return;
+                    }
+                    if($request->input('reserve_type')==3){
+                        $cart_list->each(function ($item,$key)use($fail,$value){
+                            //不存在数据或已经下架
+                            if(!$item->reserveFood||!$item->reserveFood->is_show){
+                                $fail('购物车菜品失效');
+                                return;
+                            }
+                        });
+                    }
+                }]
+            ]);
+        }
+        $validator=Validator::make($request->all(),$rule,$message);
         if($validator->fails()){
             return $this->response->error($validator->errors()->first(),$this->forbidden_code);
         }
+        $sn=Order::findAvailableNo();
         $data=$request->all();
         $data['order_sn']=$sn;
         $data['order_type']=2;
         $data['userid']=$this->user['userId'];
+        $data['real_name']=$this->user['name'];
+        $data['user_phone']=$this->user['phone'];
+        $data['eat_people']=$type==1?1:$request->input('eat_people');
+        if($type==1){//网订加班餐
+//            $data['total_price']=ReserveType::where('id',$type)->value('reserve_price');
+        }elseif ($type==2){//自助餐预定
+            $card_price=bcmul(1,config('card_convert'),2);
+            $rserve_price=bcmul(ReserveType::where('id',$type)->value('reserve_price'),$data['eat_people']-1,2);
+            $data['total_price']=bcadd($card_price,$rserve_price,2);
+        }elseif ($type==3){//自助点餐
+            if($data['get_time']==1){//上午
+                $data['get_time']=date('Y-m-d H:i:s',strtotime(date("Y-m-d"))+60*60*12);
+            }else{
+                $data['get_time']=date('Y-m-d H:i:s',strtotime(date("Y-m-d"))+60*60*18);
+            }
+            //dd($data);
+            try{
+                $data=$this->orderService->store($this->user,$data);
+            }catch (\Exception $e){
+                $data['error']=true;
+                $data['message']="提交订单失败";
+            }
+            if(!$data['error']){
+                return $this->successResponse($data['order']);
+            }
+            return $this->response->error($data['message'],$this->forbidden_code);
+
+        }
         if(!$order=Order::create($data)){
             return $this->response->error('预定失败',$this->forbidden_code);
         }
@@ -287,6 +419,7 @@ class OrderController extends Controller{
                 $res['message']='当前订单已不可取消';
             }else{
                 $order->update(['status'=>-3]);
+
             }
         }elseif ($order_tppe==2){//网订订单
             if($order->status==1){//订单为已确认
@@ -321,7 +454,11 @@ class OrderController extends Controller{
                 return $this->response->error('订单状态不正确',$this->forbidden_code);
             }
             $pay=new PaymentService();
-            $result=$pay->pay($order,$this->user,$order->pay_type);
+            if($order->pay_type=='card'){//一卡通支付
+                $result=$pay->cardPay($order,$this->user,$order->pay_type);
+            }else{//微信、支付宝支付
+                $result=$pay->pay($order,$this->user,$order->pay_type);
+            }
             if($result['error']){
                 return $this->response->error($result['message'],$this->forbidden_code);
             }

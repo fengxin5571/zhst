@@ -20,7 +20,7 @@ class Common{
         }elseif ($order->paid==1&&$order->status==0&&$order->refund_status==0){
             $status_name = '待发出';
         }elseif($order->paid==1&&$order->status==1&&$order->refund_status==0){
-            $status_name = '已发出';
+            $status_name = '待取货';
         }
         return $status_name;
     }
@@ -37,6 +37,33 @@ class Common{
         }elseif ($order->status==1){
             $status_name='已确认';
         }
+        return $status_name;
+    }
+    /**
+     * 网订网订订单状态
+     * @param $order
+     * @return string
+     */
+    public static function get_r_reserve_order_status($order){
+        if($order->reserve_type==1){
+            if($order->status==0){
+                $status_name = '已下单';
+            }elseif($order->status==-3){
+                $status_name = '已取消';
+            }
+        }else{
+            if($order->paid==0&&$order->status==0){
+                $status_name = '未支付';
+            }elseif($order->paid==0&&$order->status==-3){
+                $status_name = '已取消';
+            }elseif ($order->paid==1&&$order->status==0&&$order->refund_status==0){
+                $status_name = '已支付';
+            }
+        }
+
+//        elseif($order->paid==1&&$order->status==1&&$order->refund_status==0){
+//            $status_name = '已发出';
+//        }
         return $status_name;
     }
 }
